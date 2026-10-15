@@ -4,7 +4,7 @@
 
 Status: confirmed on QuantLib Python 1.44 (released 2026-10-13). The relevant code on master
 (89057b22da, 2026-10-15) is unchanged; the only diff vs v1.44 is the zero-variance branch (#2854).
-Not yet reported upstream (searched QuantLib issues/PRs for "Bjerksund", "trigger price",
+Reported upstream 2026-10-15: https://github.com/lballabio/QuantLib/issues/2903 (posted body verified identical to drafts/issue_F1_bjs.md). Before posting, searched QuantLib issues/PRs for "Bjerksund", "trigger price",
 "negative carry"; the three recent BJS PRs #2728/#2814/#2854 fix NaN, beta=1 and zero-vol cases,
 whose checks — NaN, below-intrinsic — cannot see this one because the returned European value is
 finite and above intrinsic).
