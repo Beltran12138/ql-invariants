@@ -145,7 +145,9 @@ def check_engine(name, S, r, q, vol, T, Ks, floor, dq, dr):
                 (v0, e0), (v1, e1) = P[(kind, K0)], P[(kind, K1)]
                 tol = (e0 + e1 + 2 * floor) / (K1 - K0)
                 s = (v1 - v0) / (K1 - K0)
-                bnd = dr if ex == "E" else 1.0
+                # American: |slope| <= 1 only when r >= 0; with r < 0 a put is never exercised
+                # early, equals the European put, and its slope is e^-rT > 1
+                bnd = dr if ex == "E" else max(1.0, dr)
                 if kind == "C" and (s > tol or s < -bnd - tol): add(name, "slope_K", kind, K0, s, tol)
                 if kind == "P" and (s < -tol or s > bnd + tol): add(name, "slope_K", kind, K0, s, tol)
             for i in range(1, len(Ks) - 1):

@@ -65,10 +65,27 @@ for r=40%, q=5%, σ=15%, T* = 0.735y. With typical equity inputs (r=5%, q=1%, σ
 Invariant `am_T_mono` (an American option is non-decreasing in maturity) failed for BJS in a random
 market; BJS's value fell from 0.134 at 91 days to 0.0098 at 182 days while FD stayed at ~0.140.
 
-### Not claimed
+### Not claimed (F1)
 
 - That the BJS (1993) formula itself is valid in this regime. Whether the paper restricts it is not
   checked (original paper not read). The point is that QuantLib returns a ~97%-wrong price silently,
   whereas Barone-Adesi-Whaley raises for inputs outside its domain (negative rates).
 - A fix. Clamping I at B0 does not help (S ≥ B0 at the money → still European). Options for the
   maintainers: raise / flag outside the domain, or fall back to another engine. Their call.
+
+## F2. JuQuadraticApproximationEngine can return less than the European value (minor)
+
+Status: confirmed on QuantLib Python 1.44; master code path unchanged (latest commit on
+juquadraticengine.cpp is f5b6d212, 2026-09-22, "Floor the Ju approximation at the exercise value").
+
+That commit floors the approximation at the exercise value (intrinsic). An American option is also
+bounded below by the European value, which can exceed intrinsic; the floor does not cover that.
+
+Grid (probe_ju_grid.py): maturity {1,2,3,5,7,14,30} days × vol {0.1,0.3,0.5,0.8,1.2} × K/S {0.8…1.25}
+× r {0,0.02,0.06,0.12} × q {0,0.03,0.08} × {call, put}: **43 / 5880** points below European.
+Worst: put, T = 3 days, vol 80%, K/S = 1.1, r = 2%, q = 0 → Ju = 10.000000000000014 (exactly the
+intrinsic floor), European = 10.3194, i.e. 3.1% below European. Second example from the random scan:
+S=194.37, K/S=1.05, r=5.89%, q=4.23%, vol=64.77%, T=1 day: Ju put 9.8159, European 9.9355, FD 9.9379.
+
+Suggested direction (maintainers' call): floor at max(European, exercise value), as
+BjerksundStensland already does (`if (results.value < europeanResults.value) results = europeanResults;`).
