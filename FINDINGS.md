@@ -89,3 +89,30 @@ S=194.37, K/S=1.05, r=5.89%, q=4.23%, vol=64.77%, T=1 day: Ju put 9.8159, Europe
 
 Suggested direction (maintainers' call): floor at max(European, exercise value), as
 BjerksundStensland already does (`if (results.value < europeanResults.value) results = europeanResults;`).
+
+## F3. Barone-Adesi-Whaley and Ju throw on valid low-volatility inputs (minor, robustness)
+
+Status: observed on QuantLib Python 1.44; root cause not traced.
+
+American call, S = 100, r = 2.57%, q = 5.71%, T = 3y: at vol = 1.66% (and 1%), both
+`BaroneAdesiWhaleyApproximationEngine` and `JuQuadraticApproximationEngine` raise
+`RuntimeError: forward + displacement (0 + 0) must be positive` for every strike in K/S ∈ [0.5, 2];
+at vol ≥ 2% they return values (probe_baw_lowvol.py). Inputs are valid (r, q > 0, vol > 0); BJS and
+QD+ price the same options. In the 300-market scan the same exception appeared in 7 markets, all with
+vol between 1.66% and 2.34% and T ≥ 1y. The recent zero-volatility handling (2bea76d0) covers
+variance < epsilon only.
+
+Side observation in the same probe: BJS gives 0.0004 for the ATM call where QD+ gives 0.1610 —
+this market (b = −3.1%, σ = 1.66%, T = 3y > T* = 1.13y) is inside the F1 region.
+
+## Denominators (as of 2026-10-15)
+
+- Callable/puttable bond tree engine: 2883 random bonds (seed 2), 0 violations; edge regions
+  covered: call within 7 days before a coupon payment 602, call on an unadjusted coupon date whose
+  payment moved 327, call on a non-business day 953, zero-vol equality 724.
+- Vanilla engines: 450 random markets (seeds 7 and 8; 150 of them before the r<0 slope-bound fix),
+  21 engines (analytic, integral, FD European/American, 7 binomial European, 3 binomial American,
+  BAW, BJS, Ju, QD+, QdFp), 9 strikes × call/put per market. MC engine not scanned yet.
+  Findings that survived triage: F1 (BJS, 30 markets with am_T_mono), F2 (Ju, ~10 markets),
+  F3 (BAW/Ju exceptions, 7 markets). Everything else was tolerance noise (gap/tol < 4 for lattice/FD),
+  QD+ approximation error at the 1e-5 relative level, or my own spec errors (three, see git log).
