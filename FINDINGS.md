@@ -94,6 +94,8 @@ BjerksundStensland already does (`if (results.value < europeanResults.value) res
 
 ## F3. Barone-Adesi-Whaley and Ju throw on valid low-volatility inputs (minor, robustness)
 
+Reported upstream 2026-10-15: https://github.com/lballabio/QuantLib/issues/2905 (body = drafts/issue_F3_baw.md, which adds a paragraph distinguishing it from #2749/#2755; verified identical).
+
 Status: observed on QuantLib Python 1.44. Suspected cause (not stepped through): the Newton step in BaroneAdesiWhaleyApproximationEngine::criticalPrice, Si = (K + RHS - bi*Si)/(1 - bi), leaves the positive axis; the seed is guarded, the iterates are not; Ju reuses criticalPrice. The forward in the message is sometimes 0, sometimes negative (-1665.46 in repro_F2_F3.py).
 
 American call, S = 100, r = 2.57%, q = 5.71%, T = 3y: at vol = 1.66% (and 1%), both
