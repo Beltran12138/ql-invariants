@@ -20,7 +20,7 @@ Details, reproductions and root causes: [FINDINGS.md](FINDINGS.md).
 | | engine | what happens | status |
 |---|---|---|---|
 | **F1** | `BjerksundStenslandApproximationEngine` | With negative carry for the call-equivalent (put with r > q, or call with q > r) and \|b\|·√T > 2σ, the early-exercise trigger falls below the strike and the engine silently returns the **European** value. Example: 1y ATM American put, r = 40%, q = 5%, σ = 15%: BJS 0.0397, binomial CRR 4001 1.1563, QdFp 1.1570 (−97%). | reported, [QuantLib#2903](https://github.com/lballabio/QuantLib/issues/2903) |
-| F2 | `JuQuadraticApproximationEngine` | Can return less than the European value (43 of 5880 grid points, worst −3.1%); the floor added in 2026-09 is the exercise value, not max(European, exercise). | not yet reported |
+| F2 | `JuQuadraticApproximationEngine` | Can return less than the European value (43 of 5880 grid points, worst −3.1%); the floor added in 2026-09 is the exercise value, not max(European, exercise). | reported, [QuantLib#2904](https://github.com/lballabio/QuantLib/issues/2904) |
 | F3 | `BaroneAdesiWhaleyApproximationEngine`, `JuQuadraticApproximationEngine` | Raise `forward + displacement (0 + 0) must be positive` on valid low-volatility inputs (σ ≲ 1.7%, q > r, T ≥ 1y). | not yet reported, root cause not traced |
 
 F1 is invisible to the checks used by recent fixes to the same engines (NaN, below intrinsic): the

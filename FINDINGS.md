@@ -75,6 +75,8 @@ market; BJS's value fell from 0.134 at 91 days to 0.0098 at 182 days while FD st
 
 ## F2. JuQuadraticApproximationEngine can return less than the European value (minor)
 
+Reported upstream 2026-10-15: https://github.com/lballabio/QuantLib/issues/2904 (posted body verified identical to drafts/issue_F2_ju.md).
+
 Status: confirmed on QuantLib Python 1.44; master code path unchanged (latest commit on
 juquadraticengine.cpp is f5b6d212, 2026-09-22, "Floor the Ju approximation at the exercise value").
 
