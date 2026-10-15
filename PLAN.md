@@ -1,23 +1,37 @@
-# ql-invariants：QuantLib 无套利不变量 spike
+# Pre-registration (English translation)
 
-开始：2026-10-15。QuantLib Python 1.44（PyPI wheel），Python 3.11.9，Windows 11。
+Translation of `PLAN.zh.md`, which was written before any scan ran and is unchanged since
+commit `b3dd40d` (2026-10-15). If the two differ, the Chinese original is authoritative.
 
-## 问题
+Started 2026-10-15. QuantLib Python 1.44 (PyPI wheel), Python 3.11.9, Windows 11.
 
-公开领域没有人对 QuantLib 的定价引擎做系统性的「与模型无关的不变量」测试。QuantLib 自带测试以参考值和跨引擎对比为主。
-这类不变量在任何无套利模型下都必须成立，计算结果违反它 = 代码有 bug，与模型选得对不对无关。
-动机案例：QuantLib issue #930（2020），7 天后被赎回的债券净价高出赎回价约 5 点，根因是日程/事件逻辑。
+## Question
 
-## 预注册（写死，事后不改）
+Nobody in the public domain runs systematic model-free invariant tests against QuantLib's pricing
+engines; QuantLib's own tests are mostly reference values and cross-engine comparisons. These
+invariants must hold under any arbitrage-free model, so a computed price that violates one is a bug in
+the code, whether or not the model is right. Motivating case: QuantLib issue #930 (2020), a bond
+called in 7 days priced about 5 points above its call price because of schedule/event logic.
 
-- **成功**：找到 ≥1 个此前未被报告的不变量违反，能最小复现，且排除了「容差设错 / 我的 harness bug / 已知的离散化伪影」。成功后才考虑向上游提 issue（提之前先给用户审阅）。
-- **失败 = 停手**：10 条不变量跑完 QuantLib Python 无违反 → 停，把「覆盖了哪些引擎、多少输入、0 违反」作为负结果记录。
-- **时间盒**：一个周末等量的工作。
+## Pre-registered criteria (fixed, not revised afterwards)
 
-## 纪律（沿用 oai-math-recheck）
+- **Success**: at least one previously unreported invariant violation, minimally reproduced, with
+  "tolerance set wrong / bug in my harness / known discretisation artefact" ruled out. Only then
+  consider an upstream issue (shown to the user for review first).
+- **Failure = stop**: if 10 invariants run on QuantLib Python with no violation, stop and record
+  "engines covered, inputs sampled, 0 violations" as a negative result.
+- **Time box**: one weekend's worth of work.
 
-1. **正控制**：每条不变量都要有一个故意写错的定价函数，harness 必须报违反；否则这道闸没牙。
-2. **负控制**：解析 Black–Scholes 引擎必须全过（它是唯一能当基准的东西）。
-3. **容差不能拍脑袋**：离散化引擎的容差 = 自身误差估计的倍数（对解析解的偏差，或 N 步与 2N 步之差），另加浮点地板。固定阈值会把已知伪影（二叉树价格在行权价方向的振荡）误报成 bug，或把真 bug 放过去。
-4. 报「没发现」必须同报分母：引擎 × 不变量 × 样本数。
-5. 每个违反先怀疑自己：先查是不是 harness 的 bug，再查是不是已知伪影，最后才算发现。
+## Discipline (carried over from oai-math-recheck)
+
+1. **Positive controls**: every invariant gets a deliberately wrong pricer; the harness must report a
+   violation, otherwise the check has no teeth.
+2. **Negative controls**: the analytic Black–Scholes engine must pass everything (it is the only
+   thing that can serve as a reference).
+3. **No hand-picked tolerances**: for discretising engines, tolerance = a multiple of the engine's own
+   error estimate (deviation from the analytic value, or the N vs 2N difference), plus a floating-point
+   floor. A fixed threshold would either report known artefacts (binomial oscillation in strike) as
+   bugs or let real bugs through.
+4. Any "nothing found" must come with its denominator: engines × invariants × samples.
+5. Every violation is first suspected to be mine: harness bug first, then known artefact, and only
+   then a finding.
