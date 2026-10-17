@@ -120,3 +120,48 @@ this market (b = −3.1%, σ = 1.66%, T = 3y > T* = 1.13y) is inside the F1 regi
   Findings that survived triage: F1 (BJS, 30 markets with am_T_mono), F2 (Ju, ~10 markets),
   F3 (BAW/Ju exceptions, 7 markets). Everything else was tolerance noise (gap/tol < 4 for lattice/FD),
   QD+ approximation error at the 1e-5 relative level, or my own spec errors (three, see git log).
+
+## Additions 2026-10-17
+
+### F1 starts before T*
+
+`probe_bjs_preT.py`, same market as the reproduction, T* ≈ 268
+days. The European fallback only takes over at T*; before that the approximation itself degrades:
+
+| days | BJS | QdFp | error |
+|---:|---:|---:|---:|
+| 120 | 1.105284 | 1.116789 | −1.0% |
+| 182 | 1.080413 | 1.141873 | −5.4% |
+| 220 | 0.951818 | 1.148598 | −17.1% |
+| 250 | 0.589190 | 1.151828 | −48.9% |
+| 268 | 0.092515 | 1.153215 | −92.0% (= European from here on) |
+
+Posted to #2903 as a follow-up. A domain check at |b|√T > 2σ alone would still leave the range below T*
+silently wrong. This also measures the detection floor of the model-free checks: maturity monotonicity
+first fails between 150 and 182 days (errors −2.2% → −5.4%); the −1.0% at 120 days passes every
+invariant.
+
+### Upstream activity
+
+- #2903 independently reproduced in C++ on master 5f4811e7 by a third party (same 0.0396681860081434).
+- #2905: fix proposed in PR #2907 (seed falls back to the perpetual boundary). Its regression test uses
+  a tolerance of 1e-2 × strike (1.0 at K = 100) against a price of about 0.16, so it checks that the
+  engines no longer throw, not that the price is right; pointed out on the PR.
+- No maintainer response on #2903–#2905 as of 2026-10-17.
+
+### OSS-Fuzz
+
+QuantLib is on OSS-Fuzz (builds succeeded daily 2026-10-11 … 10-17; runtime line coverage 9.37%).
+`fuzz-test-suite/fuzz_vanilla_option.cpp` prices American options with BAW and BJS but only calls
+`(void)option.NPV()` inside `catch (const std::exception&)`. In the 2026-10-15 coverage report the
+BJS trigger line (`const Real ht = …`, line 196) was executed 65 times and the immediate-exercise
+branch 18 times. The fuzzer reaches the code; there is no oracle. In its own input domain F3's
+exception occurs in 15 of 10000 samples and is swallowed by the catch.
+
+`fuzz_oracle/`: a calibration of model-free checks over that same domain and a draft fuzzer
+(`fuzz_american_invariants.cpp`, not compiled yet, see its header). Over 13000 samples the oracle
+flags 9 BJS cases (errors −4.6% to −99.8% vs QdFp) and 1 Ju-below-European case, with 0 flags on
+QdFp, QdPlus and BAW. It misses F1 where the European value is negligible (e.g. BJS 2.8e-11 vs QdFp
+0.38), because both maturities are below the floor; a cross-engine check would catch those but also
+flags BAW's known long-maturity overpricing (≈10% over QdFp/FD at 9 years), so it is not used as a
+crash oracle.
