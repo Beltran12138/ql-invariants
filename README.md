@@ -27,6 +27,23 @@ F1 is invisible to the checks used by recent fixes to the same engines (NaN, bel
 returned European value is finite and above intrinsic. It was caught by "an American option is
 non-decreasing in maturity".
 
+### Since 2026-10-15
+
+- **F1 starts before T\*.** The European fallback only takes over at T\* ≈ 268 days in the example;
+  before that the approximation is already 17% low at 220 days and 49% low at 250
+  ([FINDINGS.md](FINDINGS.md#additions-2026-10-17)). #2903 was reproduced independently in C++.
+- **OSS-Fuzz runs this engine without an oracle.** QuantLib's fuzz harness prices American options with
+  BAW and BJS and discards the result. [`fuzz_oracle/`](fuzz_oracle/) calibrates four model-free checks
+  over the fuzzer's own input domain (13,000 samples: flags the BJS and Ju cases, 0 flags on QdFp, QD+,
+  BAW) and has a draft fuzzer, not compiled yet.
+- **LLM-written pricers** ([`pilot_ai/`](pilot_ai/), pre-registered): three models, two prompts, 600
+  stressed points. With a 1 ms requirement, Claude's fixed-point solver passed every check; DeepSeek's
+  and Gemini's trees failed model-free checks on 12.8% and 4.0% of points. Without it, one tree returned
+  1.56e31 for a put worth 34.2. The large failures share F1's condition: carry large relative to
+  volatility. n = 1 draw per model; see [RESULTS.md](pilot_ai/RESULTS.md) for the limits.
+- **py_vollib** ([`audit_pyvollib/`](audit_pyvollib/FINDINGS.md)): 0 invariant violations in about 449k
+  checks; NaN or negative volatility is silently priced as the zero-volatility value.
+
 ### What was checked and found clean
 
 - **Callable / puttable fixed-rate bonds, `TreeCallableFixedRateBondEngine` (Hull–White):**

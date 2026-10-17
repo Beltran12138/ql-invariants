@@ -69,7 +69,27 @@ involve mathematical errors". Numerical choices that work at default parameters 
 regimes. That is the description of #2903, from code written by people, in a library with two decades
 of review.
 
-[PILOT RESULTS: TO FILL]
+RIDGE fixes defects in a loop and grades with the same model that generates. I wanted a cruder
+number from a grader that is not a model: ask three models for an American pricer, then run the same
+invariant checks on 600 points from a stressed but legal domain (rates and yields from −2% to 40%,
+volatility from 1% to 300%, 1 day to 10 years). Two prompts, one generation each, pre-registered
+before any output came back (`pilot_ai/`).
+
+With a speed requirement (under 1 ms per call), Claude wrote an Andersen–Lake–Offengelt fixed-point
+solver, the same family as QuantLib's QdFp, and passed every check. DeepSeek and Gemini wrote short
+binomial trees. DeepSeek's broke a model-free check on 12.8% of the points and returned 0 for an
+option worth 7.34. Gemini's broke one on 4.0%, and priced one call above the no-arbitrage upper bound
+(63.2 against 41.6).
+
+Without the speed requirement I expected near-zero failures, since all three wrote trees with 1,000
+or 2,000 steps and trees converge. That was wrong. Gemini's tree returned 1.56e31 for a put
+worth 34.2. Trees converge only while the up-probability stays between 0 and 1, and that fails when
+carry dominates volatility over a time step, |r − q|·√Δt > σ. QuantLib's Bjerksund–Stensland fails
+when |b|·√T > 2σ. Different code, different authors, and one of them a model. The failure region is the
+same: carry large compared with volatility.
+
+Three models, one draw each, is an anecdote. But it is enough to say that "it agrees with the textbook
+example" does not tell you whether a generated pricer is safe to use.
 
 ## What these checks cannot do
 
@@ -88,6 +108,6 @@ maintainers have looked at the open issues.
 
 The harness was wrong more often than QuantLib. Rounded maturities made the analytic engine appear to
 break parity. Two bounds I wrote down assumed non-negative rates, and every American engine
-"violated" them at once. While writing this up, an upper bound for puts did the same thing for the
-same reason. Rule of thumb: when every engine breaks the same property at the same time, the property
+"violated" them at once. While writing this up, the upper bounds for puts and then for calls did the
+same thing, for the same reason. Rule of thumb: when every engine breaks the same property at the same time, the property
 is wrong.
