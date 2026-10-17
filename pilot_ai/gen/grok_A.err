@@ -1,0 +1,60 @@
+Memory flush started.
+Memory flush completed.
+Internal error: {
+  "message": "API error (status 402 Payment Required): Grok Build usage balance exhausted",
+  "http_status": 402,
+  "promptUsage": {
+    "inputTokens": 379614,
+    "outputTokens": 15857,
+    "totalTokens": 395471,
+    "cachedReadTokens": 326656,
+    "cacheCreationTokens": 0,
+    "reasoningTokens": 12091,
+    "modelCalls": 9,
+    "apiDurationMs": 282632,
+    "costUsdTicks": 1238912400,
+    "modelUsage": {
+      "grok-4.6-build": {
+        "inputTokens": 379614,
+        "outputTokens": 15857,
+        "totalTokens": 395471,
+        "cachedReadTokens": 326656,
+        "cacheCreationTokens": 0,
+        "reasoningTokens": 12091,
+        "modelCalls": 9,
+        "apiDurationMs": 282632,
+        "costUsdTicks": 1238912400
+      }
+    },
+    "numTurns": 9
+  }
+}
+Error: Internal error: {
+  "message": "API error (status 402 Payment Required): Grok Build usage balance exhausted",
+  "http_status": 402,
+  "promptUsage": {
+    "inputTokens": 379614,
+    "outputTokens": 15857,
+    "totalTokens": 395471,
+    "cachedReadTokens": 326656,
+    "cacheCreationTokens": 0,
+    "reasoningTokens": 12091,
+    "modelCalls": 9,
+    "apiDurationMs": 282632,
+    "costUsdTicks": 1238912400,
+    "modelUsage": {
+      "grok-4.6-build": {
+        "inputTokens": 379614,
+        "outputTokens": 15857,
+        "totalTokens": 395471,
+        "cachedReadTokens": 326656,
+        "cacheCreationTokens": 0,
+        "reasoningTokens": 12091,
+        "modelCalls": 9,
+        "apiDurationMs": 282632,
+        "costUsdTicks": 1238912400
+      }
+    },
+    "numTurns": 9
+  }
+}

@@ -1,0 +1,54 @@
+import math
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    N = 150
+    dt = T / N
+
+    u = math.exp(sigma * math.sqrt(dt))
+    d = 1.0 / u
+    pu = (math.exp((r - q) * dt) - d) / (u - d)
+    pu = 0.0 if pu < 0.0 else 1.0 if pu > 1.0 else pu
+    pd = 1.0 - pu
+    disc = math.exp(-r * dt)
+    ratio = u / d
+
+    stocks = [0.0] * (N + 1)
+    values = [0.0] * (N + 1)
+
+    s = S * (d ** N)
+
+    if is_call:
+        for j in range(N + 1):
+            stocks[j] = s
+            payoff = s - K
+            values[j] = payoff if payoff > 0.0 else 0.0
+            s *= ratio
+    else:
+        for j in range(N + 1):
+            stocks[j] = s
+            payoff = K - s
+            values[j] = payoff if payoff > 0.0 else 0.0
+            s *= ratio
+
+    if is_call:
+        for i in range(N - 1, -1, -1):
+            for j in range(i + 1):
+                s_i = stocks[j] * u
+                stocks[j] = s_i
+                cont = disc * (pu * values[j + 1] + pd * values[j])
+                intr = s_i - K
+                if intr < 0.0:
+                    intr = 0.0
+                values[j] = cont if cont > intr else intr
+    else:
+        for i in range(N - 1, -1, -1):
+            for j in range(i + 1):
+                s_i = stocks[j] * u
+                stocks[j] = s_i
+                cont = disc * (pu * values[j + 1] + pd * values[j])
+                intr = K - s_i
+                if intr < 0.0:
+                    intr = 0.0
+                values[j] = cont if cont > intr else intr
+
+    return values[0]

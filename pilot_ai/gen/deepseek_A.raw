@@ -1,0 +1,41 @@
+```python
+import numpy as np
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0.0:
+        payoff = S - K if is_call else K - S
+        return float(max(payoff, 0.0))
+    if S <= 0.0:
+        payoff = S - K if is_call else K - S
+        return float(max(payoff, 0.0))
+    if sigma <= 0.0:
+        payoff = S - K if is_call else K - S
+        return float(max(payoff, 0.0))
+
+    N = 2000
+    dt = T / N
+    h = sigma * np.sqrt(dt)
+    u = np.exp(h)
+    d = 1.0 / u
+    p = (np.exp((r - q) * dt) - d) / (u - d)
+    disc = np.exp(-r * dt)
+
+    i = np.arange(N + 1)
+    stocks = S * np.exp((N - 2.0 * i) * h)
+
+    if is_call:
+        values = np.maximum(stocks - K, 0.0)
+    else:
+        values = np.maximum(K - stocks, 0.0)
+
+    for j in range(N - 1, -1, -1):
+        stocks = stocks[:-1] * d
+        if is_call:
+            intrinsic = np.maximum(stocks - K, 0.0)
+        else:
+            intrinsic = np.maximum(K - stocks, 0.0)
+        continuation = disc * (p * values[:-1] + (1.0 - p) * values[1:])
+        values = np.maximum(intrinsic, continuation)
+
+    return float(values[0])
+```

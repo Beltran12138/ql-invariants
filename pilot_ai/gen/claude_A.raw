@@ -1,0 +1,83 @@
+```python
+import math
+import numpy as np
+from scipy.stats import norm
+
+
+def _euro(S, K, T, r, q, sigma, is_call):
+    S = np.asarray(S, dtype=float)
+    if T <= 0 or sigma <= 0:
+        F = S * math.exp((r - q) * T)
+        pay = np.maximum(F - K, 0.0) if is_call else np.maximum(K - F, 0.0)
+        return math.exp(-r * T) * pay
+    sq = sigma * math.sqrt(T)
+    with np.errstate(divide="ignore"):
+        d1 = (np.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sq
+    d2 = d1 - sq
+    if is_call:
+        return S * math.exp(-q * T) * norm.cdf(d1) - K * math.exp(-r * T) * norm.cdf(d2)
+    return K * math.exp(-r * T) * norm.cdf(-d2) - S * math.exp(-q * T) * norm.cdf(-d1)
+
+
+def _tree(S, K, T, r, q, sigma, is_call, N):
+    # Drift-adjusted binomial tree with Black-Scholes smoothing at the last step
+    dt = T / N
+    nu = (r - q - 0.5 * sigma * sigma) * dt
+    sdt = sigma * math.sqrt(dt)
+    lu, ld = nu + sdt, nu - sdt
+    u, d = math.exp(lu), math.exp(ld)
+    p = (math.exp((r - q) * dt) - d) / (u - d)
+    disc = math.exp(-r * dt)
+    lnS = math.log(S)
+    n = N - 1
+    j = np.arange(n + 1)
+    St = np.exp(lnS + j * lu + (n - j) * ld)
+    ex = np.maximum(St - K, 0.0) if is_call else np.maximum(K - St, 0.0)
+    V = np.maximum(ex, _euro(St, K, dt, r, q, sigma, is_call))
+    for i in range(n - 1, -1, -1):
+        j = np.arange(i + 1)
+        St = np.exp(lnS + j * lu + (i - j) * ld)
+        ex = np.maximum(St - K, 0.0) if is_call else np.maximum(K - St, 0.0)
+        V = np.maximum(ex, disc * (p * V[1:] + (1.0 - p) * V[:-1]))
+    return float(V[0])
+
+
+def _deterministic(S, K, T, r, q, is_call):
+    ts = [0.0, T]
+    if r != q and r * q > 0:
+        x = (r * K) / (q * S)
+        if x > 0:
+            t = math.log(x) / (r - q)
+            if 0.0 < t < T:
+                ts.append(t)
+    ts.extend(np.linspace(0.0, T, 2001).tolist())
+    best = 0.0
+    for t in ts:
+        F = S * math.exp((r - q) * t)
+        pay = max(F - K, 0.0) if is_call else max(K - F, 0.0)
+        best = max(best, math.exp(-r * t) * pay)
+    return best
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S, K, T, r, q, sigma = map(float, (S, K, T, r, q, sigma))
+    intrinsic = max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    if T <= 0.0:
+        return intrinsic
+    if S <= 0.0:
+        return 0.0 if is_call else K
+    if sigma <= 0.0:
+        return max(intrinsic, _deterministic(S, K, T, r, q, is_call))
+    # Cases with no early-exercise premium
+    if is_call and q <= 0.0 and r >= 0.0:
+        return max(intrinsic, float(_euro(S, K, T, r, q, sigma, True)))
+    if (not is_call) and r <= 0.0 and q >= 0.0:
+        return max(intrinsic, float(_euro(S, K, T, r, q, sigma, False)))
+    N = 2000
+    while sigma * math.sqrt(T / N) >= 1.0:
+        N *= 2
+    p1 = _tree(S, K, T, r, q, sigma, is_call, N)
+    p2 = _tree(S, K, T, r, q, sigma, is_call, N // 2)
+    price = 2.0 * p1 - p2  # Richardson extrapolation
+    return max(price, intrinsic)
+```

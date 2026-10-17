@@ -1,0 +1,1 @@
+先核对 Bjerksund–Stensland 与快速树方法在该参数域上的公式与实现约束，再写可在 1ms 内求值的函数。对照 QuantLib / Haug 的 Bjerksund–Stensland 2002 实现，并核对宽参数域下的数值稳定性。接下来对照 Haug / tf-quant-finance 的完整公式，并核对 bivariate CDF 的符号。参数域含负利率与高波动，闭式近似会退化；改为实现可在 1ms 内求值的 Leisen–Reimer 树，并用已知基准做核对。

@@ -1,0 +1,37 @@
+import numpy as np
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0:
+        return float(max(S - K, 0.0)) if is_call else float(max(K - S, 0.0))
+    
+    if sigma <= 0:
+        if is_call:
+            return float(max(S - K, np.exp(-r * T) * max(S * np.exp((r - q) * T) - K, 0.0)))
+        else:
+            return float(max(K - S, np.exp(-r * T) * max(K - S * np.exp((r - q) * T), 0.0)))
+
+    N = 1000
+    dt = T / N
+    u = np.exp(sigma * np.sqrt(dt))
+    d = 1.0 / u
+    p = (np.exp((r - q) * dt) - d) / (u - d)
+    df = np.exp(-r * dt)
+
+    j = np.arange(N + 1)
+    S_T = S * (u ** j) * (d ** (N - j))
+    
+    if is_call:
+        V = np.maximum(S_T - K, 0.0)
+    else:
+        V = np.maximum(K - S_T, 0.0)
+        
+    for i in range(N - 1, -1, -1):
+        V = df * (p * V[1:i+2] + (1.0 - p) * V[0:i+1])
+        S_i = S * (u ** np.arange(i + 1)) * (d ** (i - np.arange(i + 1)))
+        
+        if is_call:
+            V = np.maximum(V, S_i - K)
+        else:
+            V = np.maximum(V, K - S_i)
+            
+    return float(V[0])

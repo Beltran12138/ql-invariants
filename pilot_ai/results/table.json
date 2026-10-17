@@ -1,0 +1,41 @@
+{
+ "ctrl_qdfp": {
+  "n": 600,
+  "exc": 0,
+  "nonfinite": 0,
+  "mf_any": 1,
+  "intrinsic": 0,
+  "european": 0,
+  "maturity": 0,
+  "upper": 1,
+  "strike": 0,
+  "ref7": 0,
+  "ms_med": 0
+ },
+ "ctrl_european": {
+  "n": 600,
+  "exc": 0,
+  "nonfinite": 0,
+  "mf_any": 217,
+  "intrinsic": 187,
+  "european": 0,
+  "maturity": 102,
+  "upper": 1,
+  "strike": 0,
+  "ref7": 159,
+  "ms_med": 0
+ },
+ "deepseek_B": {
+  "n": 600,
+  "exc": 0,
+  "nonfinite": 0,
+  "mf_any": 77,
+  "intrinsic": 0,
+  "european": 76,
+  "maturity": 1,
+  "upper": 1,
+  "strike": 0,
+  "ref7": 9,
+  "ms_med": 2.841
+ }
+}
