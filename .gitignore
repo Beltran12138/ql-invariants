@@ -7,3 +7,5 @@ pilot_ai/.venv_run/
 pilot_ai/empty/
 pilot_ai/results/wd_*/
 audit_pyvollib/.venv*/
+bench/empty/
+bench/results/wd/

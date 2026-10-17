@@ -1,0 +1,5 @@
+Write a Python function `barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type)` that returns the price of a European single-barrier option under the Black-Scholes model with a continuous dividend yield q. The barrier H is monitored continuously, and there is no rebate. barrier_type is one of "down-and-out", "down-and-in", "up-and-out", "up-and-in". S is spot, K strike, T time to maturity in years, r the continuously compounded risk-free rate, sigma the volatility, is_call a bool. If the barrier is already breached at inception (S <= H for down barriers, S >= H for up barriers), a knock-out option is worth 0 and a knock-in option is worth the corresponding vanilla European option. Use only the Python standard library, numpy and scipy.
+
+It must be valid for r and q in [-2%, 40%], sigma in [1%, 300%], T from 1 day to 10 years, S/K in [0.2, 5], and H/S in [0.5, 2].
+
+Reply with the code only, in a single Python code block, no explanation.
