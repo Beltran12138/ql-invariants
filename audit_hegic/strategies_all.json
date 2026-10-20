@@ -1,0 +1,3661 @@
+{
+ "0x5e81fbd28af886ddfa8e1671d7b76a89fdfb1158": {
+  "positions": 493,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   89471870091334301791989422758459776311000081919,
+   5000000000,
+   18,
+   90,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x09a4b65b3144733f1bfba6aeabedfb027a38fb60": {
+  "positions": 299,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1131317805127939056958960332440040805160559711425,
+   1250000000,
+   18,
+   10000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x6418c3514923a6464a26a2ffa5f17bf1efc96a21": {
+  "positions": 261,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1131317805127939056958960332440040805160559711425,
+   1250000000,
+   18,
+   10000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xaa0dfbfb8da7f45bb41c0fb68b71faeb959b22aa": {
+  "positions": 249,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1045810962423436861680663844891461879331360727610,
+   1250000000,
+   18,
+   10000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xf0a0df9fbd7ef03b1218583a308bda2280581008": {
+  "positions": 210,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   699195693562046759002002510931777412190819316723,
+   5000000000,
+   8,
+   130,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x701bb7efacb835a1c77fad1d127c54fa9fc976c2": {
+  "positions": 194,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1107858771604064661028054422641147951962430757500,
+   1000000000,
+   18,
+   20,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x1a1811e456fbca14ea2669ce65b58e5952082a70": {
+  "positions": 162,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   177371591029619269763244453066612876413520422694,
+   5000000000,
+   18,
+   70,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xa8df600289bec25602741756f55f27fffdab69a6": {
+  "positions": 154,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x6b7e5906f53d8bb365f4a6fa776fd0f0caf57881": {
+  "positions": 151,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x8c2392e6570fa211fa699fc1c26ab5cb8578fdad": {
+  "positions": 144,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   563653102073111655996452795737736645919512763565,
+   5000000000,
+   18,
+   110,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xc38afda9c6ab88693dd46a7723bc481f35d68082": {
+  "positions": 140,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   853400320417693828681646298706802703418402411650,
+   5000000000,
+   8,
+   70,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x49fc7e7dd78497858a85d7f501945816b1c4de43": {
+  "positions": 139,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1289150654015673636535887714228543457123507045810,
+   1000000000,
+   8,
+   30,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xf48f571ddd77dba9ae10feff6df04484685091d9": {
+  "positions": 136,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   565697112267378694359274378993342936511770256517,
+   1250000000,
+   18,
+   11000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x377191f680b52ce3d0060388fef01be7ef68e3d5": {
+  "positions": 136,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   27112849442076606964774946419794094532551604323,
+   1250000000,
+   8,
+   11000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x2739a4c003080a5b3ade22b92c3321eda2da3a9e": {
+  "positions": 131,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1045810962423436861680663844891461879331360727610,
+   1250000000,
+   18,
+   10000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xd219d2ad0d949003a5ca974311fd75a2f96fb366": {
+  "positions": 124,
+  "name": null,
+  "code_len": 13920
+ },
+ "0x527d1086c3dd22fcdb338f69d47a1e4bfe11e539": {
+  "positions": 121,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   972056367727255110199090025658462719764026527135,
+   1250000000,
+   8,
+   10000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x2ef16ae1d45c1c5a0d19da33a8e61144f40aef0f": {
+  "positions": 113,
+  "name": null,
+  "code_len": 15124
+ },
+ "0xa5f4b714cb65d92401a37e96a911d0aed35df07e": {
+  "positions": 112,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1436532216857919932447782045460894754683496355482,
+   1000000000,
+   8,
+   20,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x842409d99b07a152f046943d1f7f8dd2c2ad7fb8": {
+  "positions": 109,
+  "name": null,
+  "code_len": 13920
+ },
+ "0xcc0482bbb783ae30359d1169c86b76f60ad6eaf8": {
+  "positions": 108,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   908951765186800465087852526304638949336338139771,
+   5000000000,
+   18,
+   10,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x251847a2c58761fee3eb4d4c16caa5cb31b5ddca": {
+  "positions": 104,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1100506144211547353492095949712376808114794657393,
+   5000000000,
+   18,
+   20,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x5b77f04a304239aa2df3b7236a3471ab4e348b7e": {
+  "positions": 98,
+  "name": null,
+  "code_len": 17540
+ },
+ "0x5cf2cf3db7105bd541c2af8e5136ac298b9ce37f": {
+  "positions": 96,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1074074761110212057610087511513320940400102154220,
+   5000000000,
+   18,
+   30,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x5a62e0c7639dcca3e1adc59b7b2728fd94b1bae9": {
+  "positions": 94,
+  "name": null,
+  "code_len": 13920
+ },
+ "0x19bdfe9cbb278297180cc5205191ca624d139fbd": {
+  "positions": 91,
+  "name": null,
+  "code_len": 13920
+ },
+ "0xc4c3b5050d574cbf3ee0b613104cf5c4e47625d4": {
+  "positions": 88,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xe115bed3b0752bbbbef5c423021b464bbf93dc2c": {
+  "positions": 88,
+  "name": null,
+  "code_len": 17038
+ },
+ "0xda1491d288d0eba76b5a646f07cee99daaa327b6": {
+  "positions": 80,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   23178429094249674344798826833210772742882375958,
+   1000000000,
+   18,
+   20
+  ]
+ },
+ "0x33e538ca6e31647f20a0c0f3c8eb443c4c97dab1": {
+  "positions": 73,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   755150406664241976500326717032331142857417784809,
+   5000000000,
+   8,
+   10,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x3a1e629ddad91d521bb4d5db034c4e66f367484b": {
+  "positions": 68,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   558127740247699625560686788813301415097748143116,
+   5000000000,
+   18,
+   10
+  ]
+ },
+ "0x5c59f7ec23c0bace3b1959c99a43ffd30078e5be": {
+  "positions": 67,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x2727b807d22fcaeb7f900f49894054ed92b9125b": {
+  "positions": 67,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1131317805127939056958960332440040805160559711425,
+   1250000000,
+   18,
+   10000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x3e2a0fe32cc000d87d9e5d6ed8b3d64e9c74c752": {
+  "positions": 64,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   153863687990297431400163454655070857280828605396,
+   1250000000,
+   18,
+   9000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xc2a2444d2ff84b9a81436c481d52470dec82d2f5": {
+  "positions": 63,
+  "name": null,
+  "code_len": 13920
+ },
+ "0xc3d8706cf3e66fef36fb6627aa305c3b03778330": {
+  "positions": 62,
+  "name": null,
+  "code_len": 17540
+ },
+ "0x4e3fcb782c50bc3d512fb47348f9047dfc4ac5a1": {
+  "positions": 62,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1065914863365742713397816279410485866385875252502,
+   5000000000,
+   18,
+   130,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xaf38a4d9153b149f05fa85c2ccfaaa677c99040e": {
+  "positions": 61,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   565697112267378694359274378993342936511770256517,
+   1250000000,
+   18,
+   11000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xe377a1a97237b3b89a96d8b731a2ab10d5dac16c": {
+  "positions": 59,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x19024706f72ac6279f135db7bfd526707c4446d9": {
+  "positions": 57,
+  "name": null,
+  "code_len": 17540
+ },
+ "0x43b8647274818d311e2a2262f906747347f2f663": {
+  "positions": 49,
+  "name": null,
+  "code_len": 13920
+ },
+ "0x7d294ee096293cee0b09f05fb43a3c26fa4b6f57": {
+  "positions": 48,
+  "name": null,
+  "code_len": 17540
+ },
+ "0xe0f083fd87ebaebfcfa8236098048105d32639e4": {
+  "positions": 47,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   396225706864288308671062008134600880539429694007,
+   1250000000,
+   8,
+   10000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x035b965c5b7bc20e00358acf1794d2248ea1932a": {
+  "positions": 47,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   396225706864288308671062008134600880539429694007,
+   1250000000,
+   8,
+   10000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x51f526c508e089708bc3bf62649c071cd3af6c30": {
+  "positions": 45,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   444834877162038111246963554071224595054202335707,
+   5000000000,
+   8,
+   90,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x9c428811a97efd46b972b13e0bbd394ce6302012": {
+  "positions": 44,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   573384308263807471177299523120836380321942641536,
+   5000000000,
+   8,
+   110,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x3031ea515c2274024d93a8d3bfa91ce920e1192e": {
+  "positions": 44,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   153863687990297431400163454655070857280828605396,
+   1250000000,
+   18,
+   9000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x75cee0a3c16d5fa4c0e2c87480f8a4c63d7f0adc": {
+  "positions": 43,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   271994012031286273364724766164994401318872340504,
+   1000000000,
+   18,
+   30
+  ]
+ },
+ "0x016f745c91d77685068cf361835f33254eab058c": {
+  "positions": 43,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   823666624955519917781441993175047764225490246862,
+   5000000000,
+   18,
+   1000,
+   1000,
+   1209600,
+   2592000,
+   651216711044089368701606808179137984362776375807
+  ]
+ },
+ "0x0ac1995c43b5566760ad1d88b812f3e51e12ecc6": {
+  "positions": 41,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x7f7170cd7c0eaf20dd74beea71024fba1f2cdf0b": {
+  "positions": 40,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   233038776119141381729293451396424913667270601519,
+   5000000000,
+   18,
+   80,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x33a4b4403b8c6349371cbdf539138d78ec0aab66": {
+  "positions": 40,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   153863687990297431400163454655070857280828605396,
+   1250000000,
+   18,
+   9000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xe53a20c824ceab8151af8fc92e7eb689cfbd1231": {
+  "positions": 39,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   565697112267378694359274378993342936511770256517,
+   1250000000,
+   18,
+   11000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x6de24db5c630b971e2f07d7129123251caa05e6d": {
+  "positions": 38,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   700255823942323476035214507115656803365339157465,
+   1000000000,
+   18,
+   30,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xa1926eeb4e11b5b29b5178c321aa05a80a1b6208": {
+  "positions": 36,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   163069379632827229593569254473175024175366560630,
+   5000000000,
+   8,
+   10
+  ]
+ },
+ "0x397e8776bf76aacec3af9adc460ddbe7b8ddf7ac": {
+  "positions": 36,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   783081522659884646048085873656760936525035123696,
+   5000000000,
+   18,
+   120,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xafa483b18fe66251c8306c7018028f674f653012": {
+  "positions": 36,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x2104bc96c27a0607586e41a97321dccaea92d94b": {
+  "positions": 35,
+  "name": null,
+  "code_len": 14472
+ },
+ "0x31e6cd148fe51830e7a97262ee9cf52fe5256b08": {
+  "positions": 35,
+  "name": null,
+  "code_len": 17946
+ },
+ "0x6c5140a9296007a8d23a4162b0271adfaa9cb7ba": {
+  "positions": 33,
+  "name": null,
+  "code_len": 18254
+ },
+ "0xbaafb8c84e82cf11220a5a9c57ae73d9a7a01e8b": {
+  "positions": 32,
+  "name": null,
+  "code_len": 13920
+ },
+ "0x015faa9af7599e6cea597ebc7e7e04a149a3e992": {
+  "positions": 32,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1045810962423436861680663844891461879331360727610,
+   1250000000,
+   18,
+   10000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x70d0d7cd3343be59b5e7c4f391fafbe9249633e8": {
+  "positions": 31,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1059034992359298711270664321003583709238926303932,
+   5000000000,
+   18,
+   110
+  ]
+ },
+ "0x05458b7d9531ead242290de60beaa3cc10c87560": {
+  "positions": 31,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   565697112267378694359274378993342936511770256517,
+   1250000000,
+   18,
+   11000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xf711d0bc60f37ca28845ba623ccd9c635e5073a1": {
+  "positions": 31,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1045810962423436861680663844891461879331360727610,
+   1250000000,
+   18,
+   10000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x45b9d63f1998ca31151981792849a64342c88631": {
+  "positions": 30,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xc07fbf677f417bb9ffdd8248a74c7fbccfadae9e": {
+  "positions": 30,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   972056367727255110199090025658462719764026527135,
+   1250000000,
+   8,
+   10000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x58f59d649b808b2c0cb82c4ceb44ed9f29d2f906": {
+  "positions": 30,
+  "name": null,
+  "code_len": 25032
+ },
+ "0xb2bb4bbff94f9870ea6685eaa1fd402cd7b2539a": {
+  "positions": 29,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   677377321890334016074910305232602197991678706226,
+   5000000000,
+   8,
+   30,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x20ee3e61e8f1eb8ae959abf5f78ba8731d010ac3": {
+  "positions": 28,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   972056367727255110199090025658462719764026527135,
+   1250000000,
+   8,
+   10000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xfd7f75cc238600da784bc23016067ab5c633a127": {
+  "positions": 27,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   186882711601810375875509239487377472109066065754,
+   1000000000,
+   8,
+   20
+  ]
+ },
+ "0xfeb4861116c1bebf00574453eef4f4594e8b1bbd": {
+  "positions": 25,
+  "name": null,
+  "code_len": 13920
+ },
+ "0x2809ee8f1a450284be33587629d4b76b2a888528": {
+  "positions": 25,
+  "name": null,
+  "code_len": 13920
+ },
+ "0x8a6f9cc78e90c5c3b7f6b69ec55cac013e6f7d34": {
+  "positions": 25,
+  "name": null,
+  "code_len": 14884
+ },
+ "0x5d0bc0d08e8a7c09d10df9bb2498f1d4ab986e6a": {
+  "positions": 25,
+  "name": null,
+  "code_len": 17952
+ },
+ "0xe89c8a8c2924eb2f890f7f2e313cfebf716f79f5": {
+  "positions": 23,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   933461822714323856283076852262023537651054106277,
+   5000000000,
+   18,
+   90
+  ]
+ },
+ "0x21a4b4441aa957735902507a72a58a3a1caaa0dc": {
+  "positions": 23,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   972056367727255110199090025658462719764026527135,
+   1250000000,
+   8,
+   10000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x84554e3ce5e7ee864612c644b6fcbb60f43b6244": {
+  "positions": 21,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1196735840476688624664095732016996176157154182137,
+   5000000000,
+   18,
+   30
+  ]
+ },
+ "0x7d0c3fdf0e8a6f475ed1834ae05fda1e519fd227": {
+  "positions": 21,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   494605113382727456896348706978694174299954748595,
+   1250000000,
+   8,
+   9000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xed46f602212d1cbacd699c876b4a49761421bf97": {
+  "positions": 21,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   396225706864288308671062008134600880539429694007,
+   1250000000,
+   8,
+   10000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x0c1c4d9dfd51093be1e4bab1b565113b339835f6": {
+  "positions": 21,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x1f814266716f75dbc8175885631767c7c9cb93e4": {
+  "positions": 21,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   85309245364035654820344191774223354084994589966,
+   5000000000,
+   8,
+   1000,
+   1000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xa1370a36ebf2761c808200b681b9cb1f4fef2a42": {
+  "positions": 20,
+  "name": null,
+  "code_len": 13920
+ },
+ "0xfcd40dde82b699d455b3d073196d580227c2fba6": {
+  "positions": 20,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xc9b7bb76b5ded690e514ec6f62473556d0cf1812": {
+  "positions": 20,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   940538522573245896686541324640348065612664552718,
+   5000000000,
+   18,
+   1000,
+   2000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0x3dbc829488c937a85184454b953c3c26abd3b7d6": {
+  "positions": 19,
+  "name": null,
+  "code_len": 17540
+ },
+ "0x2b93645f310e016c1a6d1738dcec0f18621f71d0": {
+  "positions": 19,
+  "name": null,
+  "code_len": 17946
+ },
+ "0x8fb8529695237d4004cffb21499e7e49e982786a": {
+  "positions": 19,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   858443266092667653669833096936220725822615624567,
+   1250000000,
+   8,
+   12000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x77c8d12d9e2d21f6ee02e8cca332fde4be5c2465": {
+  "positions": 19,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   502505193145081136605179298449566885163135099470,
+   1250000000,
+   18,
+   8000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x153500280ac259b1cebb1da3c20d62887c83b039": {
+  "positions": 18,
+  "name": null,
+  "code_len": 14878
+ },
+ "0xc50d84ef083002ae6de0767baf84019399b2330a": {
+  "positions": 18,
+  "name": null,
+  "code_len": 13920
+ },
+ "0x64622a28f97d877e9ff1e2a7322786a58c3d8fc7": {
+  "positions": 18,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x96416b82c9dfa7649570c784eb0d0ffcde361cfe": {
+  "positions": 18,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   286152921898293579607663555407578805072003794840,
+   1250000000,
+   18,
+   12000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x5f0673ddf250bf0add6f73c9c71d6ee4e1671565": {
+  "positions": 18,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   120145885126206782616514673020980993563494563684,
+   5000000000,
+   18,
+   1000,
+   2000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0x812cecb0519d972809091594b82bf580452955a6": {
+  "positions": 17,
+  "name": null,
+  "code_len": 17562
+ },
+ "0xce5e136688a1553c67b3b39ff5366595dd0f771e": {
+  "positions": 17,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x95b90bf24ffb032a2f320d29cd78b272d6480b50": {
+  "positions": 16,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1396800549066809473312390897997067268462795699197,
+   5000000000,
+   8,
+   20,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xfe35f1ab7e18930d4316b86fcefbcf053bf44a45": {
+  "positions": 16,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   858443266092667653669833096936220725822615624567,
+   1250000000,
+   8,
+   12000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xbb318170ce1c2dc79b564f33f92bacaadabd22de": {
+  "positions": 16,
+  "name": null,
+  "code_len": 17952
+ },
+ "0xb7d2ead7d98834ca55604302be51b3921a631e38": {
+  "positions": 15,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1329913257601623181453622328051562981645108036619,
+   5000000000,
+   18,
+   1000,
+   1000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x64860fdfb4b04d8f72beeeefbd37694ca55114f5": {
+  "positions": 14,
+  "name": null,
+  "code_len": 18254
+ },
+ "0x64623ea34bc4b0d567b777213dcf9ae3f8f1388f": {
+  "positions": 14,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x6ff946f2bb609b63910a774e193f29cde7e8fd5f": {
+  "positions": 13,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x74986e5de2899750229d64f9748b1f23ee9f5cad": {
+  "positions": 13,
+  "name": null,
+  "code_len": 22742
+ },
+ "0x8f61f8717770a1541c73fba1365f5923a0c54f41": {
+  "positions": 12,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   220378742115496679216799452467547860622092238953,
+   5000000000,
+   8,
+   110
+  ]
+ },
+ "0x1771ff4f796e667e631f0504e8cefa67f839f359": {
+  "positions": 12,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   565602237021617664824496154160877142954048675320,
+   5000000000,
+   18,
+   20
+  ]
+ },
+ "0xdf30cdb7abb3ca707b82359a349d3b0c94d4a421": {
+  "positions": 12,
+  "name": null,
+  "code_len": 17038
+ },
+ "0xe56beafae4731a21ef83fe81f63b95055e81e374": {
+  "positions": 12,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   494605113382727456896348706978694174299954748595,
+   1250000000,
+   8,
+   9000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xacd93bc4f2d886920d601e8e3370791202c76ff2": {
+  "positions": 12,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1180577134835833342137568915023658550563042162297,
+   5000000000,
+   8,
+   0,
+   1000,
+   604800,
+   1209600,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xe3f646cb987a9d16eb71b8d0883744e55c95862a": {
+  "positions": 11,
+  "name": null,
+  "code_len": 17952
+ },
+ "0xb6200b4b81eb7b1fba7767d55dc2d5a21827ee23": {
+  "positions": 11,
+  "name": null,
+  "code_len": 18254
+ },
+ "0xb58ccd922b57422d0497904b7d9fccb922b8aadf": {
+  "positions": 11,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x2bbc4dd98d897f59f04c6cd8adacea880bdf4d93": {
+  "positions": 11,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x8e3063d5dcbe66e58053c3bc8e0bc8ddfe43d585": {
+  "positions": 11,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x02c9cdf432ecda5778eb515e2b8923ca5ae893d4": {
+  "positions": 10,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   678508628408358051845042209435985184037945636397,
+   5000000000,
+   8,
+   90
+  ]
+ },
+ "0xb967f1716ef31e24eaf4d64e1bcf43ce04eb5ccc": {
+  "positions": 10,
+  "name": null,
+  "code_len": 14494
+ },
+ "0xed63fc0c7e46c4b24425bfea32d76307d1655316": {
+  "positions": 10,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x218f71341d6eaaf48b71da5b24b1b285e1ea9c6a": {
+  "positions": 10,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   244011845709240344909094410649097526171943170804,
+   5000000000,
+   18,
+   0,
+   1000,
+   604800,
+   1209600,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x1060e80c1156060a1e8ddb9c64afe74564865ee2": {
+  "positions": 9,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   286152921898293579607663555407578805072003794840,
+   1250000000,
+   18,
+   12000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x26e219f01fa57de868798e358a2517edb2ef1e7f": {
+  "positions": 9,
+  "name": null,
+  "code_len": 18254
+ },
+ "0x88386f02c46d8d7b2c9e4aef3b4246a438f72693": {
+  "positions": 9,
+  "name": null,
+  "code_len": 17946
+ },
+ "0x59e5abfae84da503297bc2f3b23106b20c5a129d": {
+  "positions": 8,
+  "name": null,
+  "code_len": 15124
+ },
+ "0x61951b05ddd311e81339d8ec2a58d9ab3c61b19d": {
+  "positions": 8,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1197132211726143161613397102984952532729621521134,
+   5000000000,
+   8,
+   20
+  ]
+ },
+ "0xb7b36483b256290435a060805bdf15b3f2b122eb": {
+  "positions": 8,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   286152921898293579607663555407578805072003794840,
+   1250000000,
+   18,
+   12000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x6c46e2531a42f618f2ae452971dc9a7c6ad48d15": {
+  "positions": 8,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   27112849442076606964774946419794094532551604323,
+   1250000000,
+   8,
+   11000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x66f54921b32cca36767d2c272dda64d5152b92c4": {
+  "positions": 8,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xb89d7eb2bc675347beb685ff1be1557e983befe1": {
+  "positions": 8,
+  "name": null,
+  "code_len": 17952
+ },
+ "0xb1635287d5afdba1d0951cfa7de5e1ea23cb7ff7": {
+  "positions": 8,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x7267091cfc9825a4a1df36c26d412fefd788d935": {
+  "positions": 8,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xea55157b73468fab319020d34091e5d4df4fd344": {
+  "positions": 8,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1380346188021372636586061540321295989750956553203,
+   5000000000,
+   18,
+   0,
+   1000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x4095b224a09cb48308724c30c2751105b1f5764b": {
+  "positions": 8,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   847566328784733244458217094585181510807516551446,
+   5000000000,
+   8,
+   1000,
+   1000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xd351904cbddb4bb1a141bf1ca2a7d2f4d097936e": {
+  "positions": 8,
+  "name": null,
+  "code_len": 22742
+ },
+ "0x1cba28468862359e6d9bc67639537ccb41fab28e": {
+  "positions": 7,
+  "name": null,
+  "code_len": 13920
+ },
+ "0xe9324c7b25a674a8ced82ff06f9c6686409dc3d2": {
+  "positions": 7,
+  "name": null,
+  "code_len": 14878
+ },
+ "0xde8dea5dc0d28c3503af76bf666320b155147d96": {
+  "positions": 7,
+  "name": null,
+  "code_len": 13920
+ },
+ "0x79f87e88088293fe34def4ebe71fbfa5367220b4": {
+  "positions": 7,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   286152921898293579607663555407578805072003794840,
+   1250000000,
+   18,
+   12000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xae2f4e15564995af79b7dd2378b2680f7facc342": {
+  "positions": 7,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x4dc39763ccc861db1c8e80c34c0079c9a12f03e4": {
+  "positions": 7,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1460712544500565494776195090356989414606244723419,
+   1250000000,
+   18,
+   13000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x35ef16f3c329a54050ca120145340dfc2b4f9541": {
+  "positions": 7,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1389478432095848206000334896569704183834450531264,
+   1250000000,
+   18,
+   7000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x06c3ba025bed24ea38c2bdda4bcd2a7f9f5c30e1": {
+  "positions": 7,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   891934904583614463093177685885146011484425800357,
+   1250000000,
+   8,
+   8000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x2fb31693facce0d5d099f7fbee31829d9492cb1f": {
+  "positions": 7,
+  "name": null,
+  "code_len": 17540
+ },
+ "0x7b92a9f268bab14f0faee4337b01d563ae132bc3": {
+  "positions": 7,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x7f9198b959814f680b0a3e0fb1c01a0d7f6838f9": {
+  "positions": 7,
+  "name": null,
+  "code_len": 25032
+ },
+ "0xc1eda3fa88ddde17143aeb0949ab95a24860e589": {
+  "positions": 7,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   189259030797740717826998269780617716835309192191,
+   5000000000,
+   18,
+   1000,
+   1000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x4085776b53d40452372e991fe31bd264103bc313": {
+  "positions": 7,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   165634975282119783521919782230282931685670234001,
+   5000000000,
+   8,
+   0,
+   1000,
+   604800,
+   1209600,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x30c4d00dbe9e554fafd8798ee4ec66e986ded04b": {
+  "positions": 6,
+  "name": null,
+  "code_len": 14472
+ },
+ "0x24e5e35355fec3bb99cf55f40dd009e359c5fe89": {
+  "positions": 6,
+  "name": "HegicStrategyInverseLongButterfly",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   333769130114544001513405504504898187734594709109,
+   5000000000,
+   8,
+   30
+  ]
+ },
+ "0xfd203c73851986ad7e7b99457aeaff3d98e76228": {
+  "positions": 6,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x81ea1f0c84e40984a2726111b787c6415b74079f": {
+  "positions": 6,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x3b8f96ca6be83fa91809b7b67d4b4f24fb1c4e21": {
+  "positions": 6,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   887105561891720789436231477066281061549537887848,
+   5000000000,
+   8,
+   1000,
+   2000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0x7be0dbace53c669d47fcbada56fbc839f540c2c5": {
+  "positions": 6,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   147772496141603262328302940179859500265915443785,
+   5000000000,
+   8,
+   1000,
+   2000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0x36b6af8655101eb0f4711c1f6ad1dd76b7897754": {
+  "positions": 6,
+  "name": null,
+  "code_len": 17540
+ },
+ "0xba0dbb242bfbcfc950801a57ae0f5cf93479d278": {
+  "positions": 6,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1355558094768688994248111920240872985365355039187,
+   5000000000,
+   18,
+   1000,
+   2000,
+   1209600,
+   2592000,
+   651216711044089368701606808179137984362776375807
+  ]
+ },
+ "0xe259410bbfb45ce89fda81ec0a97d36da8db4374": {
+  "positions": 5,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x14d25367102a931e2e2f587f4ed94087dc585fd0": {
+  "positions": 5,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   27112849442076606964774946419794094532551604323,
+   1250000000,
+   8,
+   11000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x324be893029d982c187f0333e7aa1d44365d2676": {
+  "positions": 5,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x3f76e90ef967c28cae1a6aaaa799386f21914d16": {
+  "positions": 5,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   847566328784733244458217094585181510807516551446,
+   5000000000,
+   8,
+   1000,
+   1000,
+   2592000,
+   5184000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x1c3e42953ecb2067a2670f64f2335d5f0a625583": {
+  "positions": 5,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   730555813294293933911930799426589578193145733906,
+   5000000000,
+   8,
+   0,
+   2000,
+   604800,
+   1209600,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x83b9455002d6b1d2e852c04f1750275357b1176f": {
+  "positions": 5,
+  "name": null,
+  "code_len": 22764
+ },
+ "0x040278b2b961f8ebf6de26df0604499bbc3cc7b6": {
+  "positions": 4,
+  "name": null,
+  "code_len": 15124
+ },
+ "0xc89f20bca95ec2b2ab638ba3331ea3e7b7ea297a": {
+  "positions": 4,
+  "name": null,
+  "code_len": 14878
+ },
+ "0xc38bf07a8c3f662e5c89f286f76bb7f574617fd8": {
+  "positions": 4,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   234176333834867683032879638210158670834572319894,
+   5000000000,
+   18,
+   80
+  ]
+ },
+ "0xe4db400bfc4d627559d592db4ca2839cb87fbbfc": {
+  "positions": 4,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   429357245131794089530586116270420748771652653269,
+   1250000000,
+   8,
+   13000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x5bbe6c4a66d4a48442dc0837a0ea859a11d7766c": {
+  "positions": 4,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1389478432095848206000334896569704183834450531264,
+   1250000000,
+   18,
+   7000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x586c730779685687e46d2ed054bd84144f6f7f37": {
+  "positions": 4,
+  "name": null,
+  "code_len": 18254
+ },
+ "0x199db958f00f150438e5b9276ff30617d3f83ebf": {
+  "positions": 4,
+  "name": null,
+  "code_len": 17952
+ },
+ "0xc00103524932d86770d4f671107b0e170bd0fe6c": {
+  "positions": 4,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1460712544500565494776195090356989414606244723419,
+   1250000000,
+   18,
+   13000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xb02343d33d2447870e38b3452ef59d0de7b3289d": {
+  "positions": 4,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   891934904583614463093177685885146011484425800357,
+   1250000000,
+   8,
+   8000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x48ecf46aa51992a064ab172439abfe182f39b478": {
+  "positions": 4,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1389478432095848206000334896569704183834450531264,
+   1250000000,
+   18,
+   7000,
+   1209600,
+   2592000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x9e1072e5119c9345d9543a5ba1efedbae9bef2ad": {
+  "positions": 4,
+  "name": null,
+  "code_len": 17946
+ },
+ "0x7e8e5ead9a1b8f0533f614a736214a95835c79d7": {
+  "positions": 4,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x02d730e3deb3b5876fe2cba59423ef1db8211da1": {
+  "positions": 4,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   494605113382727456896348706978694174299954748595,
+   1250000000,
+   8,
+   9000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x4ee21ab8bc165cd3e6c45676f9f64426ffc2d67b": {
+  "positions": 4,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xd4e09ec867606882f78e88d46b76702ef0c43d77": {
+  "positions": 3,
+  "name": null,
+  "code_len": 15124
+ },
+ "0xaf3bfb50469aecda211db3333b8c0da263b0cce4": {
+  "positions": 3,
+  "name": null,
+  "code_len": 14494
+ },
+ "0xf62f8826f1d263993f690f3077487c1aa52a99a7": {
+  "positions": 3,
+  "name": null,
+  "code_len": 14884
+ },
+ "0x929d20d9e1a6a90bf057857c8ba09271f1baada2": {
+  "positions": 3,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x27806482457fc98f9c2e724b5e604c66bb5ba121": {
+  "positions": 3,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   429357245131794089530586116270420748771652653269,
+   1250000000,
+   8,
+   13000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xac686067c94f644d7dfb0ffe2ed0648b2650c670": {
+  "positions": 3,
+  "name": null,
+  "code_len": 18254
+ },
+ "0xf38495388493dce0885eaf1bd3ff26f9a44262a6": {
+  "positions": 3,
+  "name": null,
+  "code_len": 18254
+ },
+ "0xdb4b9a789225dcb6ca01c6a9bba127628dc1e7f2": {
+  "positions": 3,
+  "name": null,
+  "code_len": 18254
+ },
+ "0xbae8114e3a2ea5af5e2b3c8f6ff37714f6d4affb": {
+  "positions": 3,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xf8b8b54be1eb37e76873670ac9de3c28b507142c": {
+  "positions": 3,
+  "name": null,
+  "code_len": 17038
+ },
+ "0x31791a166eac17d0c6373011b1aed06c479ec709": {
+  "positions": 3,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x53dbe3b294b408e23c997fef4be7d408e21624d7": {
+  "positions": 3,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   886261437707340591764413384902916508168898138922,
+   5000000000,
+   8,
+   120,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x163602b11ef180f3015fbfbc037647715eb12ea3": {
+  "positions": 3,
+  "name": null,
+  "code_len": 17540
+ },
+ "0x18b7bd3fb416eecd1641f8019fdb5e14f85a146e": {
+  "positions": 3,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   243221639504002060268267964677550810945216701664,
+   5000000000,
+   18,
+   2000,
+   3000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0x606e34c7008f1425c3a69446de4cad3d7c6fd96d": {
+  "positions": 3,
+  "name": null,
+  "code_len": 17946
+ },
+ "0x0c24d153cdb598a2787da01e9caae3264e32f953": {
+  "positions": 3,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1355558094768688994248111920240872985365355039187,
+   5000000000,
+   18,
+   1000,
+   2000,
+   2592000,
+   5184000,
+   651216711044089368701606808179137984362776375807
+  ]
+ },
+ "0x204c226927709115ffd3f9c79632126afffbc31d": {
+  "positions": 3,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   154573855626826541314101999682308067367461680681,
+   5000000000,
+   8,
+   0,
+   1000,
+   2592000,
+   5184000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x1d6b162d70bf98696924305ead36b79b373f1c41": {
+  "positions": 3,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   165634975282119783521919782230282931685670234001,
+   5000000000,
+   8,
+   0,
+   1000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x6ea86a0b675de37e211c27b1fd844d5f29418661": {
+  "positions": 3,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   154573855626826541314101999682308067367461680681,
+   5000000000,
+   8,
+   0,
+   1000,
+   604800,
+   1209600,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xda6fb0428f2d83f86e5549a3c6cd5c001b3a2a8e": {
+  "positions": 3,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   244011845709240344909094410649097526171943170804,
+   5000000000,
+   18,
+   0,
+   1000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x4f3a108ededc278844c25b0fecaf2e0d431cc657": {
+  "positions": 2,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1413975555617849853272883506770231294723705768261,
+   1000000000,
+   8,
+   30
+  ]
+ },
+ "0x17fd06121fde19bbfdff12ee2d2f0da14492dc6b": {
+  "positions": 2,
+  "name": null,
+  "code_len": 13920
+ },
+ "0xe2de208fbb74242bbe3891d4b1e3a31cf079fe6d": {
+  "positions": 2,
+  "name": null,
+  "code_len": 13920
+ },
+ "0xce460b674390cb418090a18f51fb82d25b9de593": {
+  "positions": 2,
+  "name": null,
+  "code_len": 18254
+ },
+ "0xf87c8c7587055fa62082e8ed447fe68d98805ff2": {
+  "positions": 2,
+  "name": null,
+  "code_len": 17946
+ },
+ "0x8dd239e0e51bcaad503b06d818ce811e7d99c1af": {
+  "positions": 2,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   891934904583614463093177685885146011484425800357,
+   1250000000,
+   8,
+   8000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x9fa4dffbe3b129988e0d09536b0e2d74f6bf7d91": {
+  "positions": 2,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   429357245131794089530586116270420748771652653269,
+   1250000000,
+   8,
+   13000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x597cdd5d4cec7fa2851cc0cfd93d6915c926a107": {
+  "positions": 2,
+  "name": null,
+  "code_len": 17952
+ },
+ "0xf55f6d98e2f48f8d46757d5a6e225bf0adc9651c": {
+  "positions": 2,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1389478432095848206000334896569704183834450531264,
+   1250000000,
+   18,
+   7000,
+   2592000,
+   5184000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x2c0412a2e986c42c4227f17668a3f3d07289271e": {
+  "positions": 2,
+  "name": null,
+  "code_len": 18254
+ },
+ "0x64464e5fd7742277334da1fc4c189ca12c3e30ea": {
+  "positions": 2,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x7ab572d089714a7c1028eeffe3a0d264c4fc7765": {
+  "positions": 2,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   82791704086091407029474524252523803481250288598,
+   5000000000,
+   18,
+   2000,
+   3000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0xd2a6f454d5caa22a2a8a77e655a025a4c6b522fe": {
+  "positions": 2,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   924287485887059664396633975306252147713076143314,
+   5000000000,
+   18,
+   1000,
+   3000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0x530289340c6d2ef02140054ae7f91c293fd586cf": {
+  "positions": 2,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x223b806bab0ca844a91b247fe0ba179e11eaa728": {
+  "positions": 2,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x1068daf4cd8fde2000b6fbe8ec94f106dc08a40e": {
+  "positions": 2,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x43fbe6d90a2cac0dd322a931bf62583b8afc5179": {
+  "positions": 2,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   627227025965482362947675528639856122724115830091,
+   5000000000,
+   8,
+   80,
+   604800,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x27720f469705d51368a17d9b018b9cfb3118a641": {
+  "positions": 2,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1414401707493175371143563330872903293881331790116,
+   5000000000,
+   8,
+   2000,
+   3000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0xbb7eac9b0ada31a9f3604207cf03e1ce29c6e36d": {
+  "positions": 2,
+  "name": null,
+  "code_len": 18254
+ },
+ "0x699604ea1d48f2d924d8c92230b546dbfccc97bb": {
+  "positions": 2,
+  "name": null,
+  "code_len": 25032
+ },
+ "0xc61a4fc26b31476f398a9f855645e8a1f089315c": {
+  "positions": 2,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   313925541603415536977300641867464461143866269768,
+   5000000000,
+   8,
+   1000,
+   1000,
+   5184000,
+   7344000,
+   651216711044089368701606808179137984362776375807
+  ]
+ },
+ "0xc7e1b4dcdf2a3cdcc5e6b01e821b37a234d8e49b": {
+  "positions": 2,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   730555813294293933911930799426589578193145733906,
+   5000000000,
+   8,
+   0,
+   2000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x8c77f5427b40ab2414dc9bca48c74928bfe17dd1": {
+  "positions": 2,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xa1c290d16e2290ea536a13ba7cc3df0000a0f1a6": {
+  "positions": 2,
+  "name": null,
+  "code_len": 17946
+ },
+ "0xf24fe3288216302f093bae1e1b07c3070271c20d": {
+  "positions": 2,
+  "name": null,
+  "code_len": 22742
+ },
+ "0x9786fdb13982303f0fbdd726990d4715cdfd3487": {
+  "positions": 2,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   85309245364035654820344191774223354084994589966,
+   5000000000,
+   8,
+   1000,
+   1000,
+   5184000,
+   7344000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0xe737c8248df6d7da614a0741881facad7aff815b": {
+  "positions": 2,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   154573855626826541314101999682308067367461680681,
+   5000000000,
+   8,
+   0,
+   1000,
+   5184000,
+   7344000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x2ed4acd9183a900a2015fd2a5bb3959742bd3d95": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1251529514328625436695783054925148296675638515379,
+   5000000000,
+   18,
+   120
+  ]
+ },
+ "0x085a7ed35244b2007778aa864f240e0834b58e60": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   747072293615914842329364292853750547623499615603,
+   5000000000,
+   18,
+   130
+  ]
+ },
+ "0x5b59fb00c6a6fb3ccc32e730aaa277565de41740": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1441068362649417893272829992991845360600355863852,
+   5000000000,
+   8,
+   120
+  ]
+ },
+ "0x8995262fb9dde249ca54f310a04032a0e78b1733": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "percentage"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   648757878041541460742426461683752011726450107083,
+   5000000000,
+   8,
+   80
+  ]
+ },
+ "0xde3e86b7d94f03e0287ab679adef5d1fcb5f9ba6": {
+  "positions": 1,
+  "name": null,
+  "code_len": 14884
+ },
+ "0x7a731f47255703700ed4c21b7fd5e14eb6b5ff48": {
+  "positions": 1,
+  "name": null,
+  "code_len": 14494
+ },
+ "0x8a1b2377ce50b53bae1e74c2c12bb1f53a6e82be": {
+  "positions": 1,
+  "name": null,
+  "code_len": 14884
+ },
+ "0xa4a58919d6413f6118f30923e2e79103ce2613dd": {
+  "positions": 1,
+  "name": null,
+  "code_len": 14884
+ },
+ "0x90a51b7855a2587e72db13588f0951531375c830": {
+  "positions": 1,
+  "name": null,
+  "code_len": 18254
+ },
+ "0x7fd5e8b2ef25a105bf6b1c45f62d8925eaa068bc": {
+  "positions": 1,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   502505193145081136605179298449566885163135099470,
+   1250000000,
+   18,
+   8000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x9ab0070de2dd7dbe422f1b38df18938ebe522ccc": {
+  "positions": 1,
+  "name": null,
+  "code_len": 18254
+ },
+ "0xbabccb37338488afbabecae2c3d21b9a71289a73": {
+  "positions": 1,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   858443266092667653669833096936220725822615624567,
+   1250000000,
+   8,
+   12000,
+   5184000,
+   7776000,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x32563d6151891c0a8d56ed644acdea6fe5f4e4eb": {
+  "positions": 1,
+  "name": "HegicStrategyCall",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   429357245131794089530586116270420748771652653269,
+   1250000000,
+   8,
+   13000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x7066286c1aa0febe0f63ef8a44f6fea9f05ffbe0": {
+  "positions": 1,
+  "name": "HegicStrategyPut",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "_priceScale",
+   "periodLimits",
+   "_exerciseWindowDuration",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   336734196624322415881370726825410117573541632152,
+   1250000000,
+   8,
+   7000,
+   604800,
+   1209600,
+   0,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x72ac8a96b8e79466adce711ecbd1ec5968b371c8": {
+  "positions": 1,
+  "name": null,
+  "code_len": 17946
+ },
+ "0x24db3145f45aaf2c54f586c66b801c42c8658671": {
+  "positions": 1,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x4490ad3c0c1a61061e88a3ead661bfe16225a370": {
+  "positions": 1,
+  "name": null,
+  "code_len": 17952
+ },
+ "0x66836b3e4c768c968ed9778aa441a604f2ff466e": {
+  "positions": 1,
+  "name": null,
+  "code_len": 18254
+ },
+ "0xa3cd490bfa5ccc059c5b20e00c6ccb985a8bb5cd": {
+  "positions": 1,
+  "name": null,
+  "code_len": 18254
+ },
+ "0x0db58dcdcdc2aca8578725b62c7359544b05186e": {
+  "positions": 1,
+  "name": null,
+  "code_len": 18254
+ },
+ "0x69f53282f5c237bac96231757a46d058e6b373d1": {
+  "positions": 1,
+  "name": null,
+  "code_len": 17562
+ },
+ "0xa43b98bb7f6a4c0f8f3aa6d02b0cc5befdd04516": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "strikeScales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   953212592883559898581384572947402180979061756691,
+   5000000000,
+   18,
+   1000,
+   3000,
+   604800,
+   2592000,
+   50504343930888017826256429793606789863449369444
+  ]
+ },
+ "0x030a285f34698557ca18314742982e18299284c1": {
+  "positions": 1,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   823666624955519917781441993175047764225490246862,
+   5000000000,
+   18,
+   1000,
+   1000,
+   604800,
+   1209600,
+   651216711044089368701606808179137984362776375807
+  ]
+ },
+ "0x5af1dfeb2294ae1ee2badae9fab9caff4368b344": {
+  "positions": 1,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1049722333654167771050527306832277939381080027647,
+   5000000000,
+   8,
+   1000,
+   2000,
+   1209600,
+   2592000,
+   651216711044089368701606808179137984362776375807
+  ]
+ },
+ "0x56833274b3867507e75bd85b38721d1410620f29": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   154573855626826541314101999682308067367461680681,
+   5000000000,
+   8,
+   0,
+   1000,
+   1209600,
+   2592000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x9ab2f8530150799cddac35799d18ad2fe05bf8c3": {
+  "positions": 1,
+  "name": null,
+  "code_len": 17946
+ },
+ "0x31732ee1c32ab7c53a4c9c1be17798c1f4f16f1d": {
+  "positions": 1,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   1180577134835833342137568915023658550563042162297,
+   5000000000,
+   8,
+   0,
+   1000,
+   2592000,
+   5184000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x23dd3603a1a7ebd23998f42cb165ae6b4b789490": {
+  "positions": 1,
+  "name": null,
+  "code_len": 17562
+ },
+ "0x0db8e37299adfbd12196a523cf4b406e1d8e7029": {
+  "positions": 1,
+  "name": "HegicStrategyInverseLongCondor",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   313925541603415536977300641867464461143866269768,
+   5000000000,
+   8,
+   1000,
+   1000,
+   2592000,
+   5184000,
+   651216711044089368701606808179137984362776375807
+  ]
+ },
+ "0xdc35a8a8e1bde959844d8d2b4ee174182492772d": {
+  "positions": 1,
+  "name": null,
+  "code_len": 25032
+ },
+ "0x31680ec88e22dad57bcd5064e2c38e93bcb2e5dd": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1380346188021372636586061540321295989750956553203,
+   5000000000,
+   18,
+   0,
+   1000,
+   5184000,
+   7344000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x5cb6a74733c89c35b9f8c2df19e56ec235a2a8c9": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBullPutSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   568755998926204250539241987082278224535517636114,
+   1329913257601623181453622328051562981645108036619,
+   5000000000,
+   18,
+   1000,
+   1000,
+   5184000,
+   7344000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x1abecac7e368e4392de038adc7ccdb89f6999754": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   165634975282119783521919782230282931685670234001,
+   5000000000,
+   8,
+   0,
+   1000,
+   5184000,
+   7344000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x20c20a25fe470f87b5913478a7a7821f52f0fc64": {
+  "positions": 1,
+  "name": "HegicStrategyInverseBearCallSpread",
+  "ctor_inputs": [
+   "_priceProvider",
+   "_pricer",
+   "_limit",
+   "_spotDecimals",
+   "scales",
+   "periodLimits",
+   "_limitController"
+  ],
+  "ctor_words": [
+   621600302464183477228572899118892945908793018601,
+   85309245364035654820344191774223354084994589966,
+   5000000000,
+   8,
+   1000,
+   1000,
+   2592000,
+   5184000,
+   1283880533890173113002880662006487164653108583548
+  ]
+ },
+ "0x0354d549309b685b88cd191c74fe9f7577d7d109": {
+  "positions": 1,
+  "name": null,
+  "code_len": 17562
+ }
+}

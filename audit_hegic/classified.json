@@ -1,0 +1,209 @@
+{
+ "0x527d1086c3dd22fcdb338f69d47a1e4bfe11e539": {
+  "type": "HegicStrategyCall",
+  "how": "sourcify",
+  "ctor_words": [
+   1250000000,
+   8,
+   10000,
+   604800,
+   1209600,
+   0
+  ],
+  "asset": "BTC",
+  "minDays": 7.0,
+  "maxDays": 14.0,
+  "pricer": "0xaa4483da5c4d17830de9a843d07c37b3ec028d9f"
+ },
+ "0x2727b807d22fcaeb7f900f49894054ed92b9125b": {
+  "type": "HegicStrategyCall",
+  "how": "sourcify",
+  "ctor_words": [
+   1250000000,
+   18,
+   10000,
+   5184000,
+   7776000,
+   0
+  ],
+  "asset": "ETH",
+  "minDays": 60.0,
+  "maxDays": 90.0,
+  "pricer": "0xc62a0b7e480a23bdcfe13ea08bdacedc278a14c1"
+ },
+ "0x0ac1995c43b5566760ad1d88b812f3e51e12ecc6": {
+  "type": null,
+  "how": "len 17952, no same-length verified",
+  "ctor_words": null,
+  "asset": "ETH",
+  "minDays": 14.0,
+  "maxDays": 30.0,
+  "pricer": "0x3bc74c993e1e85ffb5e242402aec3e90dcfa249f"
+ },
+ "0xaa0dfbfb8da7f45bb41c0fb68b71faeb959b22aa": {
+  "type": "HegicStrategyPut",
+  "how": "sourcify",
+  "ctor_words": [
+   1250000000,
+   18,
+   10000,
+   604800,
+   1209600,
+   0
+  ],
+  "asset": "ETH",
+  "minDays": 7.0,
+  "maxDays": 14.0,
+  "pricer": "0xb72fc913e45522cd721252476fefb7f50a65e23a"
+ },
+ "0xb91868948b3521f2923fd1d4f6456f6b3bc52e25": {
+  "type": "HegicStrategyAdaptivePut",
+  "how": "sourcify",
+  "ctor_words": [
+   0,
+   18,
+   9000,
+   9500,
+   2592000,
+   5184000
+  ],
+  "asset": "ETH",
+  "minDays": 30.0,
+  "maxDays": 60.0,
+  "pricer": "0x3614ee77e8e2f5363e4c2eadc0aed51c1977cbd4"
+ },
+ "0x64622a28f97d877e9ff1e2a7322786a58c3d8fc7": {
+  "type": null,
+  "how": "len 17562, no same-length verified",
+  "ctor_words": null,
+  "asset": "ETH",
+  "minDays": 7.0,
+  "maxDays": 14.0,
+  "pricer": "0x4093df7bcb6a0ef34e5d56a8b05bd7966e2f6549"
+ },
+ "0xa8df600289bec25602741756f55f27fffdab69a6": {
+  "type": "HegicStrategyPut",
+  "how": "sourcify",
+  "ctor_words": null,
+  "asset": "BTC",
+  "minDays": 7.0,
+  "maxDays": 14.0,
+  "pricer": "0x4567600c2c813322f0cbb358a8d083296a7eea37"
+ },
+ "0xf48f571ddd77dba9ae10feff6df04484685091d9": {
+  "type": "HegicStrategyCall",
+  "how": "sourcify",
+  "ctor_words": [
+   1250000000,
+   18,
+   11000,
+   604800,
+   1209600,
+   0
+  ],
+  "asset": "ETH",
+  "minDays": 7.0,
+  "maxDays": 14.0,
+  "pricer": "0x6316bc5f5df141ae88c436fe6047d334f1b7e485"
+ },
+ "0x66f54921b32cca36767d2c272dda64d5152b92c4": {
+  "type": null,
+  "how": "len 17946, no same-length verified",
+  "ctor_words": null,
+  "asset": "BTC",
+  "minDays": 60.0,
+  "maxDays": 90.0,
+  "pricer": "0xa4a32102a2c1d3bf01a73b66571b440795835ff5"
+ },
+ "0xaf38a4d9153b149f05fa85c2ccfaaa677c99040e": {
+  "type": "HegicStrategyCall",
+  "how": "sourcify",
+  "ctor_words": [
+   1250000000,
+   18,
+   11000,
+   1209600,
+   2592000,
+   0
+  ],
+  "asset": "ETH",
+  "minDays": 14.0,
+  "maxDays": 30.0,
+  "pricer": "0x6316bc5f5df141ae88c436fe6047d334f1b7e485"
+ },
+ "0x5c59f7ec23c0bace3b1959c99a43ffd30078e5be": {
+  "type": null,
+  "how": "len 17952, no same-length verified",
+  "ctor_words": null,
+  "asset": "ETH",
+  "minDays": 7.0,
+  "maxDays": 14.0,
+  "pricer": "0x3bc74c993e1e85ffb5e242402aec3e90dcfa249f"
+ },
+ "0xc07fbf677f417bb9ffdd8248a74c7fbccfadae9e": {
+  "type": "HegicStrategyCall",
+  "how": "sourcify",
+  "ctor_words": [
+   1250000000,
+   8,
+   10000,
+   5184000,
+   7776000,
+   0
+  ],
+  "asset": "BTC",
+  "minDays": 60.0,
+  "maxDays": 90.0,
+  "pricer": "0xaa4483da5c4d17830de9a843d07c37b3ec028d9f"
+ },
+ "0x09a4b65b3144733f1bfba6aeabedfb027a38fb60": {
+  "type": "HegicStrategyCall",
+  "how": "sourcify",
+  "ctor_words": [
+   1250000000,
+   18,
+   10000,
+   604800,
+   1209600,
+   0
+  ],
+  "asset": "ETH",
+  "minDays": 7.0,
+  "maxDays": 14.0,
+  "pricer": "0xc62a0b7e480a23bdcfe13ea08bdacedc278a14c1"
+ },
+ "0x64860fdfb4b04d8f72beeeefbd37694ca55114f5": {
+  "type": null,
+  "how": "len 18254, no same-length verified",
+  "ctor_words": null,
+  "asset": "ETH",
+  "minDays": 14.0,
+  "maxDays": 30.0,
+  "pricer": "0xe76245e5a95f2a6ed154a6d8f1b66f0b5dd772e5"
+ },
+ "0x20ee3e61e8f1eb8ae959abf5f78ba8731d010ac3": {
+  "type": "HegicStrategyCall",
+  "how": "sourcify",
+  "ctor_words": [
+   1250000000,
+   8,
+   10000,
+   1209600,
+   2592000,
+   0
+  ],
+  "asset": "BTC",
+  "minDays": 14.0,
+  "maxDays": 30.0,
+  "pricer": "0xaa4483da5c4d17830de9a843d07c37b3ec028d9f"
+ },
+ "0xce5e136688a1553c67b3b39ff5366595dd0f771e": {
+  "type": null,
+  "how": "len 17952, no same-length verified",
+  "ctor_words": null,
+  "asset": "ETH",
+  "minDays": 60.0,
+  "maxDays": 90.0,
+  "pricer": "0x3bc74c993e1e85ffb5e242402aec3e90dcfa249f"
+ }
+}

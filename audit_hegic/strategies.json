@@ -1,0 +1,146 @@
+{
+ "0x527d1086c3dd22fcdb338f69d47a1e4bfe11e539": {
+  "pricer()": "0xaa4483da5c4d17830de9a843d07c37b3ec028d9f",
+  "priceProvider()": "0x6ce185860a4963106506c203335a2910413708e9",
+  "minPeriod()": 604800,
+  "maxPeriod()": 1209600,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 2070163533
+ },
+ "0x2727b807d22fcaeb7f900f49894054ed92b9125b": {
+  "pricer()": "0xc62a0b7e480a23bdcfe13ea08bdacedc278a14c1",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 5184000,
+  "maxPeriod()": 7776000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 21573832364
+ },
+ "0x0ac1995c43b5566760ad1d88b812f3e51e12ecc6": {
+  "pricer()": "0x3bc74c993e1e85ffb5e242402aec3e90dcfa249f",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 1209600,
+  "maxPeriod()": 2592000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 6993857435
+ },
+ "0xaa0dfbfb8da7f45bb41c0fb68b71faeb959b22aa": {
+  "pricer()": "0xb72fc913e45522cd721252476fefb7f50a65e23a",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 604800,
+  "maxPeriod()": 1209600,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 3337947645
+ },
+ "0xb91868948b3521f2923fd1d4f6456f6b3bc52e25": {
+  "pricer()": "0x3614ee77e8e2f5363e4c2eadc0aed51c1977cbd4",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 2592000,
+  "maxPeriod()": 5184000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": null,
+  "lockedLimit()": 3624280809
+ },
+ "0x64622a28f97d877e9ff1e2a7322786a58c3d8fc7": {
+  "pricer()": "0x4093df7bcb6a0ef34e5d56a8b05bd7966e2f6549",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 604800,
+  "maxPeriod()": 1209600,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 10811145164
+ },
+ "0xa8df600289bec25602741756f55f27fffdab69a6": {
+  "pricer()": "0x4567600c2c813322f0cbb358a8d083296a7eea37",
+  "priceProvider()": "0x6ce185860a4963106506c203335a2910413708e9",
+  "minPeriod()": 604800,
+  "maxPeriod()": 1209600,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 1937428787
+ },
+ "0xf48f571ddd77dba9ae10feff6df04484685091d9": {
+  "pricer()": "0x6316bc5f5df141ae88c436fe6047d334f1b7e485",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 604800,
+  "maxPeriod()": 1209600,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 454763624
+ },
+ "0x66f54921b32cca36767d2c272dda64d5152b92c4": {
+  "pricer()": "0xa4a32102a2c1d3bf01a73b66571b440795835ff5",
+  "priceProvider()": "0x6ce185860a4963106506c203335a2910413708e9",
+  "minPeriod()": 5184000,
+  "maxPeriod()": 7776000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 8359804813
+ },
+ "0xaf38a4d9153b149f05fa85c2ccfaaa677c99040e": {
+  "pricer()": "0x6316bc5f5df141ae88c436fe6047d334f1b7e485",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 1209600,
+  "maxPeriod()": 2592000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 1468333936
+ },
+ "0x5c59f7ec23c0bace3b1959c99a43ffd30078e5be": {
+  "pricer()": "0x3bc74c993e1e85ffb5e242402aec3e90dcfa249f",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 604800,
+  "maxPeriod()": 1209600,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 3568228596
+ },
+ "0xc07fbf677f417bb9ffdd8248a74c7fbccfadae9e": {
+  "pricer()": "0xaa4483da5c4d17830de9a843d07c37b3ec028d9f",
+  "priceProvider()": "0x6ce185860a4963106506c203335a2910413708e9",
+  "minPeriod()": 5184000,
+  "maxPeriod()": 7776000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 6998758979
+ },
+ "0x09a4b65b3144733f1bfba6aeabedfb027a38fb60": {
+  "pricer()": "0xc62a0b7e480a23bdcfe13ea08bdacedc278a14c1",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 604800,
+  "maxPeriod()": 1209600,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 3479758968
+ },
+ "0x64860fdfb4b04d8f72beeeefbd37694ca55114f5": {
+  "pricer()": "0xe76245e5a95f2a6ed154a6d8f1b66f0b5dd772e5",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 1209600,
+  "maxPeriod()": 2592000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 2685290496
+ },
+ "0x20ee3e61e8f1eb8ae959abf5f78ba8731d010ac3": {
+  "pricer()": "0xaa4483da5c4d17830de9a843d07c37b3ec028d9f",
+  "priceProvider()": "0x6ce185860a4963106506c203335a2910413708e9",
+  "minPeriod()": 1209600,
+  "maxPeriod()": 2592000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 2964383127
+ },
+ "0xce5e136688a1553c67b3b39ff5366595dd0f771e": {
+  "pricer()": "0x3bc74c993e1e85ffb5e242402aec3e90dcfa249f",
+  "priceProvider()": "0x639fe6ab55c921f74e7fac1ee960c0b6293ba612",
+  "minPeriod()": 5184000,
+  "maxPeriod()": 7776000,
+  "exerciseWindowDuration()": 281474976710655,
+  "k()": 80,
+  "lockedLimit()": 16358036397
+ }
+}

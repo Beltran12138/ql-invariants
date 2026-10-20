@@ -9,3 +9,6 @@ pilot_ai/results/wd_*/
 audit_pyvollib/.venv*/
 bench/empty/
 bench/results/wd/
+audit_hegic/src/
+audit_hegic/onchain_src/
+audit_hegic/*.log
