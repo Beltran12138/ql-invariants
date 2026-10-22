@@ -85,8 +85,9 @@ Without the speed requirement I expected near-zero failures, since all three wro
 or 2,000 steps and trees converge. That was wrong. Gemini's tree returned 1.56e31 for a put
 worth 34.2. Trees converge only while the up-probability stays between 0 and 1, and that fails when
 carry dominates volatility over a time step, |r − q|·√Δt > σ. QuantLib's Bjerksund–Stensland fails
-when |b|·√T > 2σ. Different code, different authors, and one of them a model. The failure region is the
-same: carry large compared with volatility.
+when |b|·√T > 2σ, also a condition on carry against volatility. Whether generated pricers in general
+fail more often in that region is a separate question, and the larger benchmark in `bench/` tests it
+(H3). The interim numbers do not support it, so I don't claim it here.
 
 Three models, one draw each, is an anecdote. But it is enough to say that "it agrees with the textbook
 example" does not tell you whether a generated pricer is safe to use.

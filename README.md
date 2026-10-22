@@ -20,7 +20,7 @@ Details, reproductions and root causes: [FINDINGS.md](FINDINGS.md).
 | | engine | what happens | status |
 |---|---|---|---|
 | **F1** | `BjerksundStenslandApproximationEngine` | With negative carry for the call-equivalent (put with r > q, or call with q > r) and \|b\|·√T > 2σ, the early-exercise trigger falls below the strike and the engine silently returns the **European** value. Example: 1y ATM American put, r = 40%, q = 5%, σ = 15%: BJS 0.0397, binomial CRR 4001 1.1563, QdFp 1.1570 (−97%). | reported, [QuantLib#2903](https://github.com/lballabio/QuantLib/issues/2903) |
-| F2 | `JuQuadraticApproximationEngine` | Can return less than the European value (43 of 5880 grid points, worst −3.1%); the floor added in 2026-09 is the exercise value, not max(European, exercise). | reported, [QuantLib#2904](https://github.com/lballabio/QuantLib/issues/2904) |
+| F2 | `JuQuadraticApproximationEngine` | Can return less than the European value (43 of 5880 grid points, worst −3.1%); the floor added in 2026-09 is the exercise value, not max(European, exercise). | fixed, [QuantLib#2904](https://github.com/lballabio/QuantLib/issues/2904) via [#2906](https://github.com/lballabio/QuantLib/pull/2906) (floor at the European value) |
 | F3 | `BaroneAdesiWhaleyApproximationEngine`, `JuQuadraticApproximationEngine` | Raise `forward + displacement (0 + 0) must be positive` on valid low-volatility inputs (σ ≲ 1.7%, q > r, T ≥ 1y). | reported, [QuantLib#2905](https://github.com/lballabio/QuantLib/issues/2905) |
 
 F1 is invisible to the checks used by recent fixes to the same engines (NaN, below intrinsic): the
@@ -39,8 +39,14 @@ non-decreasing in maturity".
 - **LLM-written pricers** ([`pilot_ai/`](pilot_ai/), pre-registered): three models, two prompts, 600
   stressed points. With a 1 ms requirement, Claude's fixed-point solver passed every check; DeepSeek's
   and Gemini's trees failed model-free checks on 12.8% and 4.0% of points. Without it, one tree returned
-  1.56e31 for a put worth 34.2. The large failures share F1's condition: carry large relative to
+  1.56e31 for a put worth 34.2: the tree's up-probability leaves [0, 1] when carry is large relative to
   volatility. n = 1 draw per model; see [RESULTS.md](pilot_ai/RESULTS.md) for the limits.
+- **Benchmark of LLM-written pricers** ([`bench/`](bench/BENCH.md), pre-registered): American and barrier
+  options, 5 samples per model and task. **In progress; no results are reported yet.** Whether generated
+  pricers fail more often where carry is large relative to volatility is hypothesis H3 there.
+- **Hegic** ([`audit_hegic/`](audit_hegic/FINDINGS.md), on-chain options on Arbitrum): live quotes,
+  ~36k historical pricer states and all 16,689 positions checked. No violation a buyer could hit; the
+  "American ≥ intrinsic" check is vacuous there by design.
 - **py_vollib** ([`audit_pyvollib/`](audit_pyvollib/FINDINGS.md)): 0 invariant violations in about 449k
   checks; NaN or negative volatility is silently priced as the zero-volatility value.
 

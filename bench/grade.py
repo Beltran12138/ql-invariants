@@ -258,7 +258,8 @@ def run_one(name):
     status = "ok"
     try:
         subprocess.run([RUNPY, "-I", os.path.join(HERE, "runner.py"), os.path.join(HERE, "code", name + ".py"), fn, inp, outp],
-                       cwd=wd, timeout=3600, check=True, capture_output=True)
+                       cwd=wd, timeout=3600, check=True, capture_output=True,
+                       env=dict(os.environ, OPENBLAS_NUM_THREADS="1", OMP_NUM_THREADS="1", MKL_NUM_THREADS="1"))
     except subprocess.TimeoutExpired:
         status = "timeout"
     except subprocess.CalledProcessError as e:
