@@ -20,7 +20,7 @@ def post(url, body, headers, timeout=3600):
 def ask(model, prompt):
     if model in CLAUDE_MODELS:
         p = subprocess.run([shutil.which("claude"), "-p", "--model", CLAUDE_MODELS[model], "--disallowedTools", *NO_TOOLS],
-                           input=prompt, capture_output=True, text=True, encoding="utf-8", cwd=EMPTY, timeout=3600, shell=False)
+                           input=prompt, capture_output=True, text=True, encoding="utf-8", cwd=EMPTY, timeout=5400, shell=False)
         if p.returncode != 0 or not p.stdout.strip() or (
                 len(p.stdout) < 300 and re.search(r"hit your (session|usage|weekly) limit", p.stdout, re.I)):
             # CLI failure (process creation, quota, auth): not a model answer
@@ -91,7 +91,7 @@ def one(model, task, k):
 def main():
     k = int(sys.argv[1]); models = sys.argv[2:]
     os.makedirs(GEN, exist_ok=True); os.makedirs(EMPTY, exist_ok=True)
-    workers = {"opus": 1, "sonnet": 1, "deepseek-pro": 8, "deepseek-flash": 8, "gemini-pro": 6, "openai": 2}
+    workers = {"opus": 4, "sonnet": 1, "deepseek-pro": 8, "deepseek-flash": 8, "gemini-pro": 6, "openai": 2}
     pools = {m: cf.ThreadPoolExecutor(workers[m]) for m in models}
     futs = [pools[m].submit(one, m, t, i) for m in models for t in TASKS for i in range(1, k + 1)]
     for f in cf.as_completed(futs):

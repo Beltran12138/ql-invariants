@@ -1,0 +1,15 @@
+opus__T1__3 exists
+opus__T1__2 exists
+opus__T1__4 exists
+opus__T2__2 attempt 1, 3064 chars
+opus__T2__1 attempt 1, 4867 chars
+opus__T2__3 attempt 1, 3371 chars
+opus__T2__4 attempt 1, 2745 chars
+opus__T2__5 attempt 1, 2901 chars
+opus__T3__1 attempt 1, 2462 chars
+opus__T3__2 attempt 1, 2978 chars
+opus__T3__3 attempt 1, 2853 chars
+opus__T3__4 attempt 1, 2898 chars
+opus__T3__5 attempt 1, 2459 chars
+opus__T1__1 attempt 1, 3181 chars
+opus__T1__5 attempt 1, 5673 chars

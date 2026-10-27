@@ -1,0 +1,87 @@
+```python
+import math
+import numpy as np
+from scipy.stats import norm
+
+
+def _bs_european(S, K, T, r, q, sigma, is_call):
+    sqT = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sqT
+    d2 = d1 - sqT
+    if is_call:
+        return S * math.exp(-q * T) * norm.cdf(d1) - K * math.exp(-r * T) * norm.cdf(d2)
+    return K * math.exp(-r * T) * norm.cdf(-d2) - S * math.exp(-q * T) * norm.cdf(-d1)
+
+
+def _peizer_pratt(z, n):
+    # Peizer-Pratt method 2 inversion used by Leisen-Reimer
+    if z == 0.0:
+        return 0.5
+    t = z / (n + 1.0 / 3.0 + 0.1 / (n + 1.0))
+    val = 0.25 - 0.25 * math.exp(-t * t * (n + 1.0 / 6.0))
+    return 0.5 + math.copysign(math.sqrt(max(val, 0.0)), z)
+
+
+def _lr_tree(S, K, T, r, q, sigma, is_call, N):
+    if N % 2 == 0:
+        N += 1
+    dt = T / N
+    sqT = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sqT
+    d2 = d1 - sqT
+    p = _peizer_pratt(d2, N)
+    pp = _peizer_pratt(d1, N)
+    growth = math.exp((r - q) * dt)
+    u = growth * pp / p
+    d = (growth - p * u) / (1.0 - p)
+    disc = math.exp(-r * dt)
+    pu = disc * p
+    pd = disc * (1.0 - p)
+    lu, ld = math.log(u), math.log(d)
+
+    sign = 1.0 if is_call else -1.0
+    j = np.arange(N + 1, dtype=float)
+    ST = S * np.exp(j * lu + (N - j) * ld)
+    V_am = np.maximum(sign * (ST - K), 0.0)
+    V_eu = V_am.copy()
+
+    for i in range(N - 1, -1, -1):
+        V_am = pu * V_am[1:i + 2] + pd * V_am[0:i + 1]
+        V_eu = pu * V_eu[1:i + 2] + pd * V_eu[0:i + 1]
+        ji = j[:i + 1]
+        ST = S * np.exp(ji * lu + (i - ji) * ld)
+        np.maximum(V_am, sign * (ST - K), out=V_am)
+
+    return float(V_am[0]), float(V_eu[0])
+
+
+def american_price(S, K, T, r, q, sigma, is_call, steps=1501):
+    S = float(S); K = float(K); T = float(T)
+    r = float(r); q = float(q); sigma = float(sigma)
+    is_call = bool(is_call)
+
+    intrinsic = max(S - K, 0.0) if is_call else max(K - S, 0.0)
+
+    if T <= 0.0 or S <= 0.0:
+        return intrinsic
+    if K <= 0.0:
+        if is_call:
+            return max(S - K, S * math.exp(-q * T) - K * math.exp(-r * T))
+        return 0.0
+
+    if sigma <= 1e-12:
+        # Deterministic underlying: choose optimal exercise time
+        t = np.linspace(0.0, T, 20001)
+        fwd = S * np.exp((r - q) * t)
+        payoff = np.maximum(fwd - K, 0.0) if is_call else np.maximum(K - fwd, 0.0)
+        return float(max(np.max(np.exp(-r * t) * payoff), intrinsic))
+
+    # American call without dividends (and r >= 0) is never exercised early
+    if is_call and q <= 0.0 and r >= 0.0:
+        return max(_bs_european(S, K, T, r, q, sigma, True), intrinsic)
+
+    am_tree, eu_tree = _lr_tree(S, K, T, r, q, sigma, is_call, steps)
+    eu_bs = _bs_european(S, K, T, r, q, sigma, is_call)
+    price = am_tree + (eu_bs - eu_tree)  # control variate correction
+    return float(max(price, intrinsic, eu_bs))
+```
