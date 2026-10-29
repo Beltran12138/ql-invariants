@@ -42,8 +42,11 @@ non-decreasing in maturity".
   1.56e31 for a put worth 34.2: the tree's up-probability leaves [0, 1] when carry is large relative to
   volatility. n = 1 draw per model; see [RESULTS.md](pilot_ai/RESULTS.md) for the limits.
 - **Benchmark of LLM-written pricers** ([`bench/`](bench/BENCH.md), pre-registered): American and barrier
-  options, 5 samples per model and task. **In progress; no results are reported yet.** Whether generated
-  pricers fail more often where carry is large relative to volatility is hypothesis H3 there.
+  options, 5 models × 5 samples per task. 48% of fast American pricers and 12% of barrier pricers have a
+  serious model-free failure; the failures are not concentrated where carry is large relative to
+  volatility (odds ratio 1.09). Along the way the pricers outvoted the reference: QuantLib's
+  `AnalyticBarrierEngine` is about 5% high when volatility is very low and carry large, a case no
+  model-free check sees. [RESULTS.md](bench/RESULTS.md).
 - **Hegic** ([`audit_hegic/`](audit_hegic/FINDINGS.md), on-chain options on Arbitrum): live quotes,
   ~36k historical pricer states and all 16,689 positions checked. No violation a buyer could hit; the
   "American ≥ intrinsic" check is vacuous there by design.
