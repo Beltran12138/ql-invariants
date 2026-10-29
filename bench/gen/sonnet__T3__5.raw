@@ -1,0 +1,83 @@
+```python
+import math
+
+import numpy as np
+from scipy.special import log_ndtr, ndtr
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    """连续监控单障碍欧式期权(无 rebate),Reiner-Rubinstein 解析解。"""
+    S, K, H, T, r, q, sigma = (float(v) for v in (S, K, H, T, r, q, sigma))
+    if barrier_type not in ("down-and-out", "down-and-in", "up-and-out", "up-and-in"):
+        raise ValueError("unknown barrier_type: %r" % (barrier_type,))
+    down = barrier_type.startswith("down")
+    is_out = barrier_type.endswith("out")
+    phi = 1.0 if is_call else -1.0
+    eta = 1.0 if down else -1.0
+
+    b = r - q
+    sT = sigma * math.sqrt(T)
+    eq = math.exp(-q * T)
+    er = math.exp(-r * T)
+
+    # vanilla
+    d1 = (math.log(S / K) + (b + 0.5 * sigma * sigma) * T) / sT
+    d2 = d1 - sT
+    vanilla = phi * (S * eq * ndtr(phi * d1) - K * er * ndtr(phi * d2))
+    vanilla = max(vanilla, 0.0)
+
+    breached = (S <= H) if down else (S >= H)
+    if breached:
+        return 0.0 if is_out else float(vanilla)
+
+    mu = (b - 0.5 * sigma * sigma) / (sigma * sigma)
+    k = (1.0 + mu) * sT
+    x1 = math.log(S / K) / sT + k
+    x2 = math.log(S / H) / sT + k
+    y1 = math.log(H * H / (S * K)) / sT + k
+    y2 = math.log(H / S) / sT + k
+    l = math.log(H / S)
+
+    def lin(x):
+        return phi * (S * eq * ndtr(phi * x) - K * er * ndtr(phi * (x - sT)))
+
+    def refl(y):
+        # (H/S)^{2(mu+1)} 与 (H/S)^{2mu} 在对数域计算,避免 sigma 很小时溢出/下溢
+        t1 = math.exp(2.0 * (mu + 1.0) * l + float(log_ndtr(eta * y)))
+        t0 = math.exp(2.0 * mu * l + float(log_ndtr(eta * (y - sT) if False else eta * y - eta * sT)))
+        return phi * (S * eq * t1 - K * er * t0)
+
+    A = lin(x1)
+    B = lin(x2)
+    C = refl(y1)
+    D = refl(y2)
+
+    kgt = K > H
+    if is_call:
+        if down:
+            if is_out:
+                p = (A - C) if kgt else (B - D)
+            else:
+                p = C if kgt else (A - B + D)
+        else:
+            if is_out:
+                p = 0.0 if kgt else (A - B + C - D)
+            else:
+                p = A if kgt else (B - C + D)
+    else:
+        if down:
+            if is_out:
+                p = (A - B + C - D) if kgt else 0.0
+            else:
+                p = (B - C + D) if kgt else A
+        else:
+            if is_out:
+                p = (B - D) if kgt else (A - C)
+            else:
+                p = (A - B + D) if kgt else C
+
+    p = float(p)
+    if not np.isfinite(p):
+        raise FloatingPointError("non-finite barrier price")
+    return min(max(p, 0.0), float(vanilla)) if not is_out else min(max(p, 0.0), float(vanilla))
+```

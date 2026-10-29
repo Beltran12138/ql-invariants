@@ -1,0 +1,152 @@
+```python
+import numpy as np
+
+
+def _peizer_pratt(z, n):
+    if z == 0.0:
+        return 0.5
+    denom = n + 1.0 / 3.0 + 0.1 / (n + 1.0)
+    alpha = (z / denom) ** 2 * (n + 1.0 / 6.0)
+    val = -np.expm1(-alpha)
+    if val < 0.0:
+        val = 0.0
+    elif val > 1.0:
+        val = 1.0
+    return 0.5 + np.copysign(0.5 * np.sqrt(val), z)
+
+
+def _deterministic_price(S, K, T, r, q, is_call):
+    candidates = [0.0, T]
+
+    def f(t):
+        er = np.exp(-r * t)
+        eq = np.exp(-q * t)
+        if is_call:
+            return S * eq - K * er
+        return K * er - S * eq
+
+    if is_call:
+        if abs(q) > 1e-15 and r * K > 0.0:
+            ratio = (r * K) / (q * S)
+            if ratio > 0.0 and abs(r - q) > 1e-15:
+                t_crit = np.log(ratio) / (r - q)
+                if 0.0 < t_crit < T:
+                    candidates.append(t_crit)
+    else:
+        if abs(r) > 1e-15 and q * S > 0.0:
+            ratio = (q * S) / (r * K)
+            if ratio > 0.0 and abs(r - q) > 1e-15:
+                t_crit = np.log(ratio) / (r - q)
+                if 0.0 < t_crit < T:
+                    candidates.append(t_crit)
+
+    return max(0.0, max(f(t) for t in candidates))
+
+
+def _crr_price(S, K, T, r, q, sigma, is_call, N=2000):
+    if sigma <= 0.0:
+        return _deterministic_price(S, K, T, r, q, is_call)
+
+    dt = T / N
+    u = np.exp(sigma * np.sqrt(dt))
+    d = 1.0 / u
+    growth = np.exp((r - q) * dt)
+    p = (growth - d) / (u - d)
+
+    if p <= 0.0 or p >= 1.0 or not np.isfinite(p):
+        N_new = N * 4
+        if N_new <= 20000:
+            return _crr_price(S, K, T, r, q, sigma, is_call, N_new)
+        p = min(max(p, 1e-12), 1.0 - 1e-12)
+
+    logu = np.log(u)
+    logd = np.log(d)
+    j = np.arange(N + 1)
+    logS = np.log(S) + j * logu + (N - j) * logd
+    ST = np.exp(logS)
+
+    if is_call:
+        V = np.maximum(ST - K, 0.0)
+    else:
+        V = np.maximum(K - ST, 0.0)
+
+    disc = np.exp(-r * dt)
+
+    for i in range(N - 1, -1, -1):
+        V = disc * (p * V[1:] + (1.0 - p) * V[:-1])
+        j = np.arange(i + 1)
+        logS_nodes = np.log(S) + j * logu + (i - j) * logd
+        S_nodes = np.exp(logS_nodes)
+        if is_call:
+            exercise = np.maximum(S_nodes - K, 0.0)
+        else:
+            exercise = np.maximum(K - S_nodes, 0.0)
+        V = np.maximum(V, exercise)
+
+    return float(V[0])
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S = float(S)
+    K = float(K)
+    T = float(T)
+    r = float(r)
+    q = float(q)
+    sigma = float(sigma)
+    is_call = bool(is_call)
+
+    if T <= 0.0 or S <= 0.0 or K <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+
+    if sigma <= 1e-10:
+        return _deterministic_price(S, K, T, r, q, is_call)
+
+    sqrtT = sigma * np.sqrt(T)
+    if sqrtT <= 1e-14:
+        return _deterministic_price(S, K, T, r, q, is_call)
+
+    n = 2001
+    dt = T / n
+
+    d1 = (np.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sqrtT
+    d2 = d1 - sqrtT
+
+    p = _peizer_pratt(d1, n)
+    p2 = _peizer_pratt(d2, n)
+
+    if p <= 1e-12 or p >= 1.0 - 1e-12 or p2 <= 1e-12 or p2 >= 1.0 - 1e-12:
+        return _crr_price(S, K, T, r, q, sigma, is_call)
+
+    growth = np.exp((r - q) * dt)
+    u = growth * p2 / p
+    d = (growth - p * u) / (1.0 - p)
+
+    if u <= 0.0 or d <= 0.0 or not np.isfinite(u) or not np.isfinite(d):
+        return _crr_price(S, K, T, r, q, sigma, is_call)
+
+    logu = np.log(u)
+    logd = np.log(d)
+    j = np.arange(n + 1)
+    logS = np.log(S) + j * logu + (n - j) * logd
+    ST = np.exp(logS)
+
+    if is_call:
+        V = np.maximum(ST - K, 0.0)
+    else:
+        V = np.maximum(K - ST, 0.0)
+
+    disc = np.exp(-r * dt)
+
+    for i in range(n - 1, -1, -1):
+        V = disc * (p * V[1:] + (1.0 - p) * V[:-1])
+        j = np.arange(i + 1)
+        logS_nodes = np.log(S) + j * logu + (i - j) * logd
+        S_nodes = np.exp(logS_nodes)
+        if is_call:
+            exercise = np.maximum(S_nodes - K, 0.0)
+        else:
+            exercise = np.maximum(K - S_nodes, 0.0)
+        V = np.maximum(V, exercise)
+
+    return float(V[0])
+```

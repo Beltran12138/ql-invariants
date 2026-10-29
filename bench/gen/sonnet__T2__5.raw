@@ -1,0 +1,74 @@
+```python
+import numpy as np
+from scipy.stats import norm
+
+
+def _bs_european(S, K, T, r, q, sigma, is_call):
+    # 欧式 Black-Scholes 价格
+    sqT = np.sqrt(T)
+    d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * sqT)
+    d2 = d1 - sigma * sqT
+    if is_call:
+        return S * np.exp(-q * T) * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    return K * np.exp(-r * T) * norm.cdf(-d2) - S * np.exp(-q * T) * norm.cdf(-d1)
+
+
+def _crr(S, K, T, r, q, sigma, phi, n):
+    # CRR 二叉树, 向量化后向归纳, 每个节点检查提前行权
+    dt = T / n
+    x = sigma * np.sqrt(dt)
+    u = np.exp(x)
+    d = 1.0 / u
+    p = (np.exp((r - q) * dt) - d) / (u - d)
+    p = min(max(p, 0.0), 1.0)
+    disc = np.exp(-r * dt)
+    j = np.arange(n + 1)
+    ST = S * np.exp((2 * j - n) * x)
+    V = np.maximum(phi * (ST - K), 0.0)
+    for i in range(n - 1, -1, -1):
+        V = disc * (p * V[1:] + (1.0 - p) * V[:-1])
+        ST = ST[1:] * d
+        V = np.maximum(V, phi * (ST - K))
+    return float(V[0])
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S, K, T, r, q, sigma = map(float, (S, K, T, r, q, sigma))
+    phi = 1.0 if is_call else -1.0
+    intrinsic = max(phi * (S - K), 0.0)
+
+    if S <= 0.0:
+        return 0.0 if is_call else K
+    if K <= 0.0:
+        return S if is_call else 0.0
+    if T <= 0.0:
+        return intrinsic
+
+    # 美式看涨: 无红利收益且 r>=0 时不会提前行权, 等于欧式
+    if is_call and q <= 0.0 and r >= 0.0:
+        if sigma <= 0.0:
+            return max(S * np.exp(-q * T) - K * np.exp(-r * T), 0.0)
+        return _bs_european(S, K, T, r, q, sigma, True)
+
+    # 美式看跌: r<=0 且 q>=0 时同理 (对称性)
+    if (not is_call) and r <= 0.0 and q >= 0.0:
+        if sigma <= 0.0:
+            return max(K * np.exp(-r * T) - S * np.exp(-q * T), 0.0)
+        return _bs_european(S, K, T, r, q, sigma, False)
+
+    if sigma <= 1e-8:
+        # 确定性情形: 在 t=0 到 T 之间择优行权时点 (远期路径为确定值)
+        t = np.linspace(0.0, T, 2001)
+        ST = S * np.exp((r - q) * t)
+        return float(np.max(np.maximum(phi * (ST - K), 0.0) * np.exp(-r * t)))
+
+    # 保证风险中性概率在 [0,1] 内: |(r-q)dt| <= sigma*sqrt(dt)
+    n = 2000
+    while abs(r - q) * np.sqrt(T / n) > sigma and n < 200000:
+        n *= 2
+
+    # 相邻两个步数取平均, 抑制二叉树的奇偶震荡
+    v1 = _crr(S, K, T, r, q, sigma, phi, n)
+    v2 = _crr(S, K, T, r, q, sigma, phi, n + 1)
+    return max(0.5 * (v1 + v2), intrinsic)
+```

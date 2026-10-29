@@ -1,0 +1,90 @@
+import math
+from scipy.special import log_ndtr
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    barrier_type = barrier_type.strip().lower()
+    if barrier_type not in ("down-and-out", "down-and-in", "up-and-out", "up-and-in"):
+        raise ValueError("invalid barrier_type: %r" % barrier_type)
+    if S <= 0 or K <= 0 or H <= 0 or T <= 0 or sigma <= 0:
+        raise ValueError("S, K, H, T and sigma must be positive")
+
+    down = barrier_type.startswith("down")
+    knock_out = barrier_type.endswith("out")
+    phi = 1.0 if is_call else -1.0
+    eta = 1.0 if down else -1.0
+
+    sv = sigma * math.sqrt(T)
+    mu = (r - q) / (sigma * sigma) - 0.5
+    drift = ((r - q) / sigma + 0.5 * sigma) * math.sqrt(T)  # (1 + mu) * sigma * sqrt(T)
+
+    lS, lK, lH = math.log(S), math.log(K), math.log(H)
+    log_s_disc = lS - q * T
+    log_k_disc = lK - r * T
+
+    def _exp(x):
+        # exp with protection: arguments are bounded in theory; guard against inf
+        if x < -745.0:
+            return 0.0
+        if x > 709.0:
+            return math.inf
+        return math.exp(x)
+
+    def term(log_ws, log_wk, z, sgn):
+        # phi * [S e^{-qT} w_s N(sgn z) - K e^{-rT} w_k N(sgn (z - sv))], in log space
+        a = _exp(log_s_disc + log_ws + float(log_ndtr(sgn * z)))
+        b = _exp(log_k_disc + log_wk + float(log_ndtr(sgn * (z - sv))))
+        return phi * (a - b)
+
+    x1 = (lS - lK) / sv + drift
+
+    def vanilla():
+        return max(term(0.0, 0.0, x1, phi), 0.0)
+
+    breached = (S <= H) if down else (S >= H)
+    if breached:
+        return 0.0 if knock_out else vanilla()
+
+    lHS = lH - lS
+    x2 = (lS - lH) / sv + drift
+    y1 = (2.0 * lH - lS - lK) / sv + drift
+    y2 = (lH - lS) / sv + drift
+    ws = 2.0 * (mu + 1.0) * lHS
+    wk = 2.0 * mu * lHS
+
+    A = lambda: term(0.0, 0.0, x1, phi)
+    B = lambda: term(0.0, 0.0, x2, phi)
+    C = lambda: term(ws, wk, y1, eta)
+    D = lambda: term(ws, wk, y2, eta)
+
+    k_above = K >= H
+
+    if is_call and down:
+        if k_above:
+            price = A() - C() if knock_out else C()
+        else:
+            price = B() - D() if knock_out else A() - B() + D()
+    elif is_call and not down:
+        if k_above:
+            price = 0.0 if knock_out else A()
+        else:
+            price = A() - B() + C() - D() if knock_out else B() - C() + D()
+    elif not is_call and down:
+        if k_above:
+            price = A() - B() + C() - D() if knock_out else B() - C() + D()
+        else:
+            price = 0.0 if knock_out else A()
+    else:  # put, up
+        if k_above:
+            price = B() - D() if knock_out else A() - B() + D()
+        else:
+            price = A() - C() if knock_out else C()
+
+    if not math.isfinite(price):
+        raise FloatingPointError("non-finite barrier price")
+
+    price = max(price, 0.0)
+    van = vanilla()
+    if price > van:
+        price = van
+    return price

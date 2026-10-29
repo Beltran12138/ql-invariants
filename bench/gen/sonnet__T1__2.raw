@@ -1,0 +1,90 @@
+```python
+import numpy as np
+from math import exp, log, sqrt, copysign
+from scipy.special import ndtr, gammaln
+
+_Z = 8.0          # |d1|,|d2| 超过此值视为确定性区域（波动率贡献可忽略）
+_LB = {}
+
+
+def _lbin(N):
+    t = _LB.get(N)
+    if t is None:
+        ar = np.arange(N + 1)
+        lg = gammaln(np.arange(N + 2))
+        t = (ar.astype(float), lg[N + 1] - lg[ar + 1] - lg[N + 1 - ar])
+        _LB[N] = t
+    return t
+
+
+def _pp(z, n):
+    # Peizer-Pratt 反演 (Leisen-Reimer 树)
+    a = z / (n + 1.0 / 3.0 + 0.1 / (n + 1.0))
+    return 0.5 + copysign(0.5 * sqrt(1.0 - exp(-a * a * (n + 1.0 / 6.0))), z)
+
+
+def _put_tree(S, K, T, r, q, N, d1, d2, eu_bs):
+    """Leisen-Reimer 二叉树美式看跌 + 欧式 BS 控制变量；N 为奇数。"""
+    dt = T / N
+    g = exp((r - q) * dt)
+    pb = _pp(d1, N)
+    p = _pp(d2, N)
+    u = g * pb / p
+    d = (g - p * u) / (1.0 - p)
+    ld = log(d)
+    lw = log(u) - ld
+    if N * abs(lw) > 500.0 or N * abs(ld) > 500.0:
+        return None
+    j, lbin = _lbin(N)
+    V = np.maximum(K - np.exp(log(S) + N * ld + j * lw), 0.0)
+    pr = np.exp(lbin + j * log(p) + (N - j) * log(1.0 - p))
+    eu_tree = exp(-r * T) * float(pr @ V)          # 同一棵树上的欧式价
+    tab = K - np.outer(np.exp(log(S) + ld * j), np.exp(j * lw))   # tab[n, j] = K - S d^n w^j
+    disc = exp(-r * dt)
+    a = disc * p
+    c = disc * (1.0 - p)
+    mx = np.maximum
+    for n in range(N - 1, -1, -1):
+        V = a * V[1:] + c * V[:-1]
+        mx(V, tab[n, :n + 1], out=V)
+    return float(V[0]) + (eu_bs - eu_tree)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if is_call:                      # 看涨看跌对称: C(S,K,r,q) = P(K,S,q,r)
+        S, K, r, q = K, S, q, r
+    sT = sigma * sqrt(T)
+    d1 = (log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sT
+    d2 = d1 - sT
+    eu = K * exp(-r * T) * ndtr(-d2) - S * exp(-q * T) * ndtr(-d1)
+    intr = K - S
+    if not (r > 0.0 or q < r):       # 提前行权无价值 -> 欧式
+        return eu
+    if r > 0.0:                      # 低于永续边界: 立即行权
+        hs = 0.5 * sigma * sigma
+        bb = r - q - hs
+        xm = (-bb - sqrt(bb * bb + 4.0 * hs * r)) / (2.0 * hs)
+        if S <= K * xm / (xm - 1.0):
+            return max(intr, eu)
+    best = max(eu, intr, 0.0)
+    if abs(d1) > _Z or abs(d2) > _Z:  # 近似确定性区域: 对行权时刻取最优
+        if r * q > 0.0 and r != q:
+            t = log(r * K / (q * S)) / (r - q)
+            if 0.0 < t < T:
+                best = max(best, K * exp(-r * t) - S * exp(-q * t))
+        return best
+    N = 21 + 2 * int(min(sT, 2.5) * 12.0)
+    M = (N // 2) | 1
+    v1 = _put_tree(S, K, T, r, q, N, d1, d2, eu)
+    v2 = _put_tree(S, K, T, r, q, M, d1, d2, eu)
+    if v1 is None or v2 is None:
+        return best
+    v = 2.0 * v1 - v2                # 对步数做 Richardson 外推
+    if v != v:
+        return best
+    return max(v, best)
+
+
+for _n in range(3, 84, 2):
+    _lbin(_n)
+```

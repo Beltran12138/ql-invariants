@@ -1,0 +1,111 @@
+```python
+import math
+import numpy as np
+from scipy.special import ndtr
+from scipy.optimize import brentq
+
+def _european_price(S, K, T, r, q, sigma, is_call):
+    sqT = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma**2) * T) / sqT
+    d2 = d1 - sqT
+    
+    if is_call:
+        return S * math.exp(-q * T) * ndtr(d1) - K * math.exp(-r * T) * ndtr(d2)
+    else:
+        return K * math.exp(-r * T) * ndtr(-d2) - S * math.exp(-q * T) * ndtr(-d1)
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S, K, T = float(S), float(K), float(T)
+    r, q, sigma = float(r), float(q), float(sigma)
+    
+    if is_call and q <= 0.0 and r >= 0.0:
+        return _european_price(S, K, T, r, q, sigma, True)
+    if not is_call and r <= 0.0 and q >= 0.0:
+        return _european_price(S, K, T, r, q, sigma, False)
+        
+    eur_price = _european_price(S, K, T, r, q, sigma, is_call)
+    
+    sig2 = sigma**2
+    if r == 0.0:
+        K_baw = 2.0 / (sig2 * T)
+    else:
+        K_baw = (2.0 * r / sig2) / -math.expm1(-r * T)
+        
+    N_baw = 2.0 * (r - q) / sig2
+    sqT = sigma * math.sqrt(T)
+    exp_qT = math.exp(-q * T)
+    
+    if is_call:
+        if eur_price < S - K:
+            eur_price = S - K
+            
+        q2 = (1.0 - N_baw + math.sqrt((N_baw - 1.0)**2 + 4.0 * K_baw)) / 2.0
+        
+        def f_call(x):
+            d1 = (math.log(x / K) + (r - q + 0.5 * sig2) * T) / sqT
+            c_eur = _european_price(x, K, T, r, q, sigma, True)
+            return x - K - c_eur - (x / q2) * (1.0 - exp_qT * ndtr(d1))
+            
+        low = K
+        if f_call(low) >= 0.0:
+            S_star = K
+        else:
+            high = K * 1.2
+            max_iters = 100
+            iters = 0
+            while f_call(high) < 0.0 and iters < max_iters:
+                if high > 1e10 * K:
+                    return eur_price
+                high *= 1.5
+                iters += 1
+            if iters == max_iters:
+                return eur_price
+            try:
+                S_star = brentq(f_call, low, high)
+            except ValueError:
+                return eur_price
+                
+        if S >= S_star:
+            return S - K
+        else:
+            d1_star = (math.log(S_star / K) + (r - q + 0.5 * sig2) * T) / sqT
+            A2 = (S_star / q2) * (1.0 - exp_qT * ndtr(d1_star))
+            return eur_price + A2 * (S / S_star)**q2
+            
+    else:
+        if eur_price < K - S:
+            eur_price = K - S
+            
+        q1 = (1.0 - N_baw - math.sqrt((N_baw - 1.0)**2 + 4.0 * K_baw)) / 2.0
+        
+        def f_put(x):
+            d1 = (math.log(x / K) + (r - q + 0.5 * sig2) * T) / sqT
+            p_eur = _european_price(x, K, T, r, q, sigma, False)
+            return K - x - p_eur + (x / q1) * (1.0 - exp_qT * ndtr(-d1))
+            
+        high = K
+        if f_put(high) >= 0.0:
+            S_star = K
+        else:
+            low = K * 0.8
+            max_iters = 100
+            iters = 0
+            while f_put(low) < 0.0 and iters < max_iters:
+                if low < 1e-10 * K:
+                    return eur_price
+                low *= 0.5
+                iters += 1
+            if iters == max_iters:
+                return eur_price
+            try:
+                S_star = brentq(f_put, low, high)
+            except ValueError:
+                return eur_price
+                
+        if S <= S_star:
+            return K - S
+        else:
+            d1_star = (math.log(S_star / K) + (r - q + 0.5 * sig2) * T) / sqT
+            A1 = -(S_star / q1) * (1.0 - exp_qT * ndtr(-d1_star))
+            return eur_price + A1 * (S / S_star)**q1
+```

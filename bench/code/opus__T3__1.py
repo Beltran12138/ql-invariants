@@ -1,0 +1,72 @@
+import math
+from scipy.special import log_ndtr
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    S = float(S); K = float(K); H = float(H); T = float(T)
+    r = float(r); q = float(q); sigma = float(sigma)
+    bt = barrier_type.strip().lower().replace("_", "-").replace(" ", "-")
+    valid = ("down-and-out", "down-and-in", "up-and-out", "up-and-in")
+    if bt not in valid:
+        raise ValueError("barrier_type must be one of %s" % (valid,))
+    if S <= 0 or K <= 0 or H <= 0 or T <= 0 or sigma <= 0:
+        raise ValueError("S, K, H, T and sigma must be positive")
+
+    down = bt.startswith("down")
+    knock_in = bt.endswith("in")
+    phi = 1.0 if is_call else -1.0
+    eta = 1.0 if down else -1.0
+
+    sv = sigma * math.sqrt(T)
+    mu = (r - q) / (sigma * sigma) - 0.5
+    lnS = math.log(S)
+    lnK = math.log(K)
+    h = math.log(H / S)
+    dfS = lnS - q * T  # log of S*exp(-qT)
+    dfK = lnK - r * T  # log of K*exp(-rT)
+
+    def _e(logc, z):
+        return math.exp(logc + float(log_ndtr(z)))
+
+    x1 = math.log(S / K) / sv + (1.0 + mu) * sv
+    A = phi * (_e(dfS, phi * x1) - _e(dfK, phi * (x1 - sv)))
+
+    # Barrier already breached at inception
+    if (down and S <= H) or ((not down) and S >= H):
+        return max(A, 0.0) if knock_in else 0.0
+
+    x2 = -h / sv + (1.0 + mu) * sv
+    y1 = math.log(H * H / (S * K)) / sv + (1.0 + mu) * sv
+    y2 = h / sv + (1.0 + mu) * sv
+
+    B = phi * (_e(dfS, phi * x2) - _e(dfK, phi * (x2 - sv)))
+    C = phi * (_e(dfS + 2.0 * (mu + 1.0) * h, eta * y1)
+               - _e(dfK + 2.0 * mu * h, eta * (y1 - sv)))
+    D = phi * (_e(dfS + 2.0 * (mu + 1.0) * h, eta * y2)
+               - _e(dfK + 2.0 * mu * h, eta * (y2 - sv)))
+
+    k_above = K > H
+
+    if is_call:
+        if bt == "down-and-in":
+            v = C if k_above else A - B + D
+        elif bt == "up-and-in":
+            v = A if k_above else B - C + D
+        elif bt == "down-and-out":
+            v = A - C if k_above else B - D
+        else:  # up-and-out
+            v = 0.0 if k_above else A - B + C - D
+    else:
+        if bt == "down-and-in":
+            v = B - C + D if k_above else A
+        elif bt == "up-and-in":
+            v = A - B + D if k_above else C
+        elif bt == "down-and-out":
+            v = A - B + C - D if k_above else 0.0
+        else:  # up-and-out
+            v = B - D if k_above else A - C
+
+    v = max(v, 0.0)
+    if knock_in:
+        v = min(v, max(A, 0.0))
+    return v

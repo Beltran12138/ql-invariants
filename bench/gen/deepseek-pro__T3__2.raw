@@ -1,0 +1,172 @@
+```python
+import math
+from scipy.stats import norm
+from scipy.special import log_ndtr
+
+
+def _vanilla(S, K, T, r, q, sigma, is_call):
+    if T <= 0:
+        if is_call:
+            return max(S - K, 0.0)
+        return max(K - S, 0.0)
+
+    v = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma**2) * T) / v
+    d2 = d1 - v
+
+    if is_call:
+        return S * math.exp(-q * T) * norm.cdf(d1) - K * math.exp(-r * T) * norm.cdf(d2)
+    else:
+        return K * math.exp(-r * T) * norm.cdf(-d2) - S * math.exp(-q * T) * norm.cdf(-d1)
+
+
+def _log_cdf_diff(a, b):
+    """log(N(a) - N(b)) assuming a > b."""
+    if math.isinf(a) and a > 0:
+        return log_ndtr(-b)
+    if math.isinf(b) and b < 0:
+        return log_ndtr(a)
+
+    if a > 0 and b >= 0:
+        # N(a) - N(b) = Phi(-b) - Phi(-a)
+        log_tail_b = log_ndtr(-b)
+        log_tail_a = log_ndtr(-a)
+        if log_tail_b > log_tail_a + 50.0:
+            return log_tail_b
+        return log_tail_b + math.log1p(-math.exp(log_tail_a - log_tail_b))
+
+    if a <= 0 and b < 0:
+        # N(a) - N(b) = Phi(a) - Phi(b)
+        log_phi_a = log_ndtr(a)
+        log_phi_b = log_ndtr(b)
+        if log_phi_a > log_phi_b + 50.0:
+            return log_phi_a
+        return log_phi_a + math.log1p(-math.exp(log_phi_b - log_phi_a))
+
+    # Mixed case: one tail is not extreme
+    diff = norm.cdf(a) - norm.cdf(b)
+    if diff <= 0:
+        return -math.inf
+    return math.log(diff)
+
+
+def _stable_cdf_diff(log_coeff, z_upper, z_lower):
+    """exp(log_coeff) * (N(z_upper) - N(z_lower))"""
+    if z_upper == z_lower:
+        return 0.0
+
+    if z_upper > z_lower:
+        sign = 1.0
+        a, b = z_upper, z_lower
+    else:
+        sign = -1.0
+        a, b = z_lower, z_upper
+
+    log_abs_diff = _log_cdf_diff(a, b)
+    log_result = log_coeff + log_abs_diff
+
+    if log_result > 709.0:
+        return sign * math.inf
+    if log_result < -745.0:
+        return 0.0
+    return sign * math.exp(log_result)
+
+
+def _integ_plus(a, A, B, T, sigma, log_weight=0.0):
+    """Integral of e^z over normal density N(a, sigma^2 T) on [A, B]."""
+    v2 = sigma**2 * T
+    v = sigma * math.sqrt(T)
+    z_upper = (B - a - v2) / v
+    z_lower = (A - a - v2) / v
+    log_coeff = log_weight + a + 0.5 * v2
+    return _stable_cdf_diff(log_coeff, z_upper, z_lower)
+
+
+def _integ_minus(a, A, B, T, sigma, log_weight=0.0):
+    """Integral of e^{-z} over normal density N(a, sigma^2 T) on [A, B]."""
+    v2 = sigma**2 * T
+    v = sigma * math.sqrt(T)
+    z_upper = (B - a + v2) / v
+    z_lower = (A - a + v2) / v
+    log_coeff = log_weight - a + 0.5 * v2
+    return _stable_cdf_diff(log_coeff, z_upper, z_lower)
+
+
+def _integ_const(a, A, B, T, sigma, log_weight=0.0):
+    """Integral of 1 over normal density N(a, sigma^2 T) on [A, B]."""
+    v = sigma * math.sqrt(T)
+    z_upper = (B - a) / v
+    z_lower = (A - a) / v
+    return _stable_cdf_diff(log_weight, z_upper, z_lower)
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    """
+    Price a continuously monitored European single-barrier option under
+    Black-Scholes with continuous dividend yield q.
+    """
+    bt = barrier_type.lower()
+    is_down = bt.startswith("down")
+    is_in = bt.endswith("in")
+
+    # Immediate barrier breach
+    if is_down and S <= H:
+        return _vanilla(S, K, T, r, q, sigma, is_call) if is_in else 0.0
+    if not is_down and S >= H:
+        return _vanilla(S, K, T, r, q, sigma, is_call) if is_in else 0.0
+
+    b = r - q
+    mu = b - 0.5 * sigma**2
+    v2 = sigma**2 * T
+    v = sigma * math.sqrt(T)
+
+    if is_down:
+        x = math.log(S / H)
+        m = mu
+    else:
+        x = math.log(H / S)
+        m = -mu
+
+    a1 = x + m * T
+    a2 = m * T - x
+    factor_log = -2.0 * m * x / (sigma**2)
+
+    integ1 = 0.0
+    integ2 = 0.0
+
+    if is_down:
+        if is_call:
+            L = max(0.0, math.log(K / H))
+            A, B = L, math.inf
+            integ1 = H * _integ_plus(a1, A, B, T, sigma) - K * _integ_const(a1, A, B, T, sigma)
+            integ2 = H * _integ_plus(a2, A, B, T, sigma, factor_log) - K * _integ_const(a2, A, B, T, sigma, factor_log)
+        else:
+            U = math.log(K / H) if K > H else 0.0
+            if U <= 0.0:
+                ko = 0.0
+            else:
+                A, B = 0.0, U
+                integ1 = K * _integ_const(a1, A, B, T, sigma) - H * _integ_plus(a1, A, B, T, sigma)
+                integ2 = K * _integ_const(a2, A, B, T, sigma, factor_log) - H * _integ_plus(a2, A, B, T, sigma, factor_log)
+    else:  # up
+        if is_call:
+            U = math.log(H / K) if K < H else 0.0
+            if U <= 0.0:
+                ko = 0.0
+            else:
+                A, B = 0.0, U
+                integ1 = H * _integ_minus(a1, A, B, T, sigma) - K * _integ_const(a1, A, B, T, sigma)
+                integ2 = H * _integ_minus(a2, A, B, T, sigma, factor_log) - K * _integ_const(a2, A, B, T, sigma, factor_log)
+        else:
+            L = max(0.0, math.log(H / K))
+            A, B = L, math.inf
+            integ1 = K * _integ_const(a1, A, B, T, sigma) - H * _integ_minus(a1, A, B, T, sigma)
+            integ2 = K * _integ_const(a2, A, B, T, sigma, factor_log) - H * _integ_minus(a2, A, B, T, sigma, factor_log)
+
+    ko = math.exp(-r * T) * (integ1 - integ2)
+    ko = max(0.0, ko)
+
+    if is_in:
+        return _vanilla(S, K, T, r, q, sigma, is_call) - ko
+    return ko
+```

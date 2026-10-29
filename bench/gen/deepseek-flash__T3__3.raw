@@ -1,0 +1,179 @@
+```python
+import math
+from scipy.integrate import quad
+
+_SQRT2 = math.sqrt(2.0)
+_INV_SQRT2PI = 1.0 / math.sqrt(2.0 * math.pi)
+
+
+def _norm_pdf(x):
+    return _INV_SQRT2PI * math.exp(-0.5 * x * x)
+
+
+def _norm_cdf(x):
+    return 0.5 * math.erfc(-x / _SQRT2)
+
+
+def _integrate(f, a, b):
+    if b <= a:
+        return 0.0
+    return quad(f, a, b, epsabs=1e-12, epsrel=1e-12, limit=200)[0]
+
+
+def _vanilla(S, K, T, r, q, sigma, is_call):
+    if T <= 0.0:
+        if is_call:
+            return max(S - K, 0.0)
+        return max(K - S, 0.0)
+
+    s = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / s
+    d2 = d1 - s
+
+    if is_call:
+        return S * math.exp(-q * T) * _norm_cdf(d1) - K * math.exp(-r * T) * _norm_cdf(d2)
+    return K * math.exp(-r * T) * _norm_cdf(-d2) - S * math.exp(-q * T) * _norm_cdf(-d1)
+
+
+def _down_out(S, K, H, T, r, q, sigma, is_call):
+    x = math.log(S / H)
+    nu = r - q - 0.5 * sigma * sigma
+    s = sigma * math.sqrt(T)
+    var = s * s
+    disc = math.exp(-r * T)
+
+    if is_call:
+        z_bar = -(x + nu * T) / s
+        z_strike = (math.log(K / H) - x - nu * T) / s
+        lo = max(z_bar, z_strike)
+        L = max(lo, -12.0)
+        U = max(max(lo, s), L) + 12.0
+
+        def f(z):
+            y = x + nu * T + s * z
+            if y <= 0.0:
+                return 0.0
+            factor = -math.expm1(-2.0 * x * y / var)
+            st = H * math.exp(y)
+            pay = st - K
+            if pay <= 0.0:
+                return 0.0
+            return pay * factor * _norm_pdf(z)
+
+        return disc * _integrate(f, L, U)
+
+    else:
+        z_bar = -(x + nu * T) / s
+        z_strike = (math.log(K / H) - x - nu * T) / s
+        lo = z_bar
+        hi = z_strike
+        L = max(lo, -12.0)
+        U = min(hi, 12.0)
+        if U <= L:
+            return 0.0
+
+        def f(z):
+            y = x + nu * T + s * z
+            if y <= 0.0:
+                return 0.0
+            factor = -math.expm1(-2.0 * x * y / var)
+            st = H * math.exp(y)
+            pay = K - st
+            if pay <= 0.0:
+                return 0.0
+            return pay * factor * _norm_pdf(z)
+
+        return disc * _integrate(f, L, U)
+
+
+def _up_out(S, K, H, T, r, q, sigma, is_call):
+    x = math.log(H / S)
+    nu = -(r - q - 0.5 * sigma * sigma)
+    s = sigma * math.sqrt(T)
+    var = s * s
+    disc = math.exp(-r * T)
+
+    if is_call:
+        if K >= H:
+            return 0.0
+
+        z_bar = -(x + nu * T) / s
+        z_strike = (math.log(H / K) - x - nu * T) / s
+        lo = z_bar
+        hi = z_strike
+        L = max(lo, -12.0)
+        U = min(hi, 12.0)
+        if U <= L:
+            return 0.0
+
+        def f(z):
+            y = x + nu * T + s * z
+            if y <= 0.0:
+                return 0.0
+            factor = -math.expm1(-2.0 * x * y / var)
+            st = H * math.exp(-y)
+            pay = st - K
+            if pay <= 0.0:
+                return 0.0
+            return pay * factor * _norm_pdf(z)
+
+        return disc * _integrate(f, L, U)
+
+    else:
+        z_bar = -(x + nu * T) / s
+        z_strike = (math.log(H / K) - x - nu * T) / s
+        lo = max(z_bar, z_strike)
+        L = max(lo, -12.0)
+        U = max(max(lo, 0.0), L) + 12.0
+
+        def f(z):
+            y = x + nu * T + s * z
+            if y <= 0.0:
+                return 0.0
+            factor = -math.expm1(-2.0 * x * y / var)
+            st = H * math.exp(-y)
+            pay = K - st
+            if pay <= 0.0:
+                return 0.0
+            return pay * factor * _norm_pdf(z)
+
+        return disc * _integrate(f, L, U)
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    bt = barrier_type.lower()
+    is_down = "down" in bt
+    is_out = "out" in bt
+
+    vanilla = _vanilla(S, K, T, r, q, sigma, is_call)
+
+    breached = (is_down and S <= H) or ((not is_down) and S >= H)
+
+    if T <= 0.0:
+        if is_out:
+            return 0.0 if breached else vanilla
+        return vanilla if breached else 0.0
+
+    if breached:
+        return 0.0 if is_out else vanilla
+
+    if is_down:
+        ko = _down_out(S, K, H, T, r, q, sigma, is_call)
+    else:
+        ko = _up_out(S, K, H, T, r, q, sigma, is_call)
+
+    if ko < 0.0:
+        ko = 0.0
+    if ko > vanilla:
+        ko = vanilla
+
+    if is_out:
+        return ko
+
+    price = vanilla - ko
+    if price < 0.0:
+        price = 0.0
+    if price > vanilla:
+        price = vanilla
+    return price
+```

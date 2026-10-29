@@ -1,0 +1,85 @@
+import math
+from scipy.special import log_ndtr
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    S = float(S)
+    K = float(K)
+    H = float(H)
+    T = float(T)
+    r = float(r)
+    q = float(q)
+    sigma = float(sigma)
+
+    bt = str(barrier_type).strip().lower().replace("_", "-").replace(" ", "-")
+    if bt not in ("down-and-out", "down-and-in", "up-and-out", "up-and-in"):
+        raise ValueError("invalid barrier_type: %r" % barrier_type)
+    down = bt.startswith("down")
+    knock_in = bt.endswith("in")
+
+    phi = 1.0 if is_call else -1.0
+    eta = 1.0 if down else -1.0
+
+    v = sigma * math.sqrt(T)
+    b = r - q
+    mu = (b - 0.5 * sigma * sigma) / (sigma * sigma)
+    drift = b * math.sqrt(T) / sigma + 0.5 * v  # (1 + mu) * v
+
+    lS = math.log(S)
+    lK = math.log(K)
+    lH = math.log(H)
+    lHS = lH - lS
+    logS_disc = lS - q * T
+    logK_disc = lK - r * T
+
+    def leg(x, sgn, logm1, logm2):
+        # phi * [S e^{-qT} m1 N(sgn*x) - K e^{-rT} m2 N(sgn*(x - v))], computed in log space
+        t1 = math.exp(logS_disc + logm1 + float(log_ndtr(sgn * x)))
+        t2 = math.exp(logK_disc + logm2 + float(log_ndtr(sgn * (x - v))))
+        return phi * (t1 - t2)
+
+    x1 = (lS - lK) / v + drift
+    x2 = (lS - lH) / v + drift
+    y1 = (2.0 * lH - lS - lK) / v + drift
+    y2 = lHS / v + drift
+
+    lm1 = 2.0 * (mu + 1.0) * lHS
+    lm2 = 2.0 * mu * lHS
+
+    A = leg(x1, phi, 0.0, 0.0)
+    vanilla = max(A, 0.0)
+
+    breached = (S <= H) if down else (S >= H)
+    if breached:
+        return vanilla if knock_in else 0.0
+
+    B = leg(x2, phi, 0.0, 0.0)
+    C = leg(y1, eta, lm1, lm2)
+    D = leg(y2, eta, lm1, lm2)
+
+    high_strike = K >= H
+
+    if is_call:
+        if down:
+            if knock_in:
+                price = C if high_strike else A - B + D
+            else:
+                price = A - C if high_strike else B - D
+        else:
+            if knock_in:
+                price = A if high_strike else B - C + D
+            else:
+                price = 0.0 if high_strike else A - B + C - D
+    else:
+        if down:
+            if knock_in:
+                price = B - C + D if high_strike else A
+            else:
+                price = A - B + C - D if high_strike else 0.0
+        else:
+            if knock_in:
+                price = A - B + D if high_strike else C
+            else:
+                price = B - D if high_strike else A - C
+
+    return float(min(max(price, 0.0), vanilla))

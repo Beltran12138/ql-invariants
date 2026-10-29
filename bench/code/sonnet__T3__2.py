@@ -1,0 +1,85 @@
+import math
+import numpy as np
+from scipy.special import ndtr, log_ndtr
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    S = float(S); K = float(K); H = float(H); T = float(T)
+    r = float(r); q = float(q); sigma = float(sigma)
+    phi = 1.0 if is_call else -1.0
+    bt = barrier_type.lower().replace("_", "-").replace(" ", "-")
+    if bt not in ("down-and-out", "down-and-in", "up-and-out", "up-and-in"):
+        raise ValueError("unknown barrier_type")
+    down = bt.startswith("down")
+    knock_in = bt.endswith("in")
+    eta = 1.0 if down else -1.0
+
+    vol = sigma * math.sqrt(T)
+    lnSK = math.log(S / K)
+    qT = q * T
+    rT = r * T
+
+    def vanilla():
+        x1 = lnSK / vol + (1.0 + (r - q) / sigma**2 - 0.5) * vol
+        # d1 = ln(S/K)/vol + (b + sigma^2/2) T / vol，与 x1 等价
+        d1 = (lnSK + (r - q + 0.5 * sigma**2) * T) / vol
+        d2 = d1 - vol
+        return phi * (S * math.exp(-qT) * ndtr(phi * d1)
+                      - K * math.exp(-rT) * ndtr(phi * d2))
+
+    # 起始即触碰障碍
+    breached = (S <= H) if down else (S >= H)
+    if breached:
+        return 0.0 if not knock_in else max(vanilla(), 0.0)
+
+    mu = (r - q - 0.5 * sigma**2) / sigma**2
+    lnHS = math.log(H / S)
+    lnK = math.log(K)
+    lnS = math.log(S)
+    c = (1.0 + mu) * vol
+
+    x1 = lnSK / vol + c
+    x2 = -lnHS / vol + c
+    y1 = (2.0 * lnHS - lnSK) / vol + c
+    y2 = lnHS / vol + c
+
+    def AB(x):
+        return phi * (S * math.exp(-qT) * ndtr(phi * x)
+                      - K * math.exp(-rT) * ndtr(phi * x - phi * vol))
+
+    def CD(y):
+        # 在对数空间计算，避免 (H/S)^(2mu) 溢出
+        a1 = lnS - qT + 2.0 * (mu + 1.0) * lnHS + float(log_ndtr(eta * y))
+        a2 = lnK - rT + 2.0 * mu * lnHS + float(log_ndtr(eta * y - eta * vol))
+        return phi * (math.exp(a1) - math.exp(a2))
+
+    A = AB(x1)
+    B = AB(x2)
+    C = CD(y1)
+    D = CD(y2)
+
+    kgt = K >= H
+    if bt == "down-and-in":
+        if is_call:
+            p = C if kgt else A - B + D
+        else:
+            p = B - C + D if kgt else A
+    elif bt == "up-and-in":
+        if is_call:
+            p = A if kgt else B - C + D
+        else:
+            p = A - B + D if kgt else C
+    elif bt == "down-and-out":
+        if is_call:
+            p = A - C if kgt else B - D
+        else:
+            p = A - B + C - D if kgt else 0.0
+    else:  # up-and-out
+        if is_call:
+            p = 0.0 if kgt else A - B + C - D
+        else:
+            p = B - D if kgt else A - C
+
+    v = vanilla()
+    p = min(max(p, 0.0), max(v, 0.0))
+    return float(p)

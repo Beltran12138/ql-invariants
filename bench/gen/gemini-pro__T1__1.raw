@@ -1,0 +1,73 @@
+```python
+import numpy as np
+from scipy.special import ndtr
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S = np.asarray(S, dtype=float)
+    K = np.asarray(K, dtype=float)
+    T = np.asarray(T, dtype=float)
+    r = np.asarray(r, dtype=float)
+    q = np.asarray(q, dtype=float)
+    sigma = np.asarray(sigma, dtype=float)
+    is_call = np.asarray(is_call, dtype=bool)
+
+    S_c = np.where(is_call, S, K)
+    K_c = np.where(is_call, K, S)
+    r_c = np.where(is_call, r, q)
+    q_c = np.where(is_call, q, r)
+
+    b = r_c - q_c
+    q_safe = np.where(q_c > 0, q_c, 1e-8)
+    b_safe = r_c - q_safe
+
+    rT = r_c * T
+    M_k = np.where(
+        np.abs(rT) < 1e-7,
+        2.0 / (sigma**2 * T),
+        -(2.0 * r_c / sigma**2) / np.expm1(-rT)
+    )
+
+    N = 2.0 * b_safe / sigma**2
+    q2 = (-(N - 1.0) + np.sqrt((N - 1.0)**2 + 4.0 * M_k)) / 2.0
+    S_star = K_c * q2 / (q2 - 1.0)
+
+    sqT = sigma * np.sqrt(T)
+    exp_qT = np.exp(-q_safe * T)
+    exp_rT = np.exp(-r_c * T)
+    inv_sqrt2pi = 0.3989422804014327
+
+    for _ in range(5):
+        d1 = (np.log(S_star / K_c) + (b_safe + 0.5 * sigma**2) * T) / sqT
+        d2 = d1 - sqT
+
+        Nd1 = ndtr(d1)
+        Nd2 = ndtr(d2)
+        pdf1 = inv_sqrt2pi * np.exp(-0.5 * d1**2)
+
+        c_star = S_star * exp_qT * Nd1 - K_c * exp_rT * Nd2
+
+        f = S_star - K_c - c_star - (S_star / q2) * (1.0 - exp_qT * Nd1)
+        df = (1.0 - 1.0 / q2) * (1.0 - exp_qT * Nd1) + (exp_qT * pdf1) / (q2 * sqT)
+
+        step = np.clip(f / df, -0.5 * S_star, 0.5 * S_star)
+        S_star = S_star - step
+
+    d1_S = (np.log(S_c / K_c) + (b_safe + 0.5 * sigma**2) * T) / sqT
+    d2_S = d1_S - sqT
+    c_S = S_c * exp_qT * ndtr(d1_S) - K_c * exp_rT * ndtr(d2_S)
+
+    d1_star = (np.log(S_star / K_c) + (b_safe + 0.5 * sigma**2) * T) / sqT
+    A2 = (S_star / q2) * (1.0 - exp_qT * ndtr(d1_star))
+
+    ratio = np.minimum(S_c / S_star, 1.0)
+    baw_price = c_S + A2 * (ratio**q2)
+    baw_price = np.where(S_c >= S_star, S_c - K_c, baw_price)
+
+    d1_true = (np.log(S_c / K_c) + (b + 0.5 * sigma**2) * T) / sqT
+    d2_true = d1_true - sqT
+    euro_price = S_c * np.exp(-q_c * T) * ndtr(d1_true) - K_c * np.exp(-r_c * T) * ndtr(d2_true)
+
+    final_price = np.where(q_c > 0, baw_price, euro_price)
+
+    return final_price if final_price.ndim > 0 else final_price.item()
+```

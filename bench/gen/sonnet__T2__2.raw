@@ -1,0 +1,100 @@
+```python
+import math
+import numpy as np
+from scipy.stats import norm
+
+
+def _bs_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0 or sigma <= 0:
+        fwd = S * math.exp(-q * T) - K * math.exp(-r * T)
+        v = max(fwd, 0.0) if is_call else max(-fwd, 0.0)
+        return v
+    sq = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / sq
+    d2 = d1 - sq
+    if is_call:
+        return S * math.exp(-q * T) * norm.cdf(d1) - K * math.exp(-r * T) * norm.cdf(d2)
+    return K * math.exp(-r * T) * norm.cdf(-d2) - S * math.exp(-q * T) * norm.cdf(-d1)
+
+
+def _peizer_pratt(z, n):
+    x = (z / (n + 1.0 / 3.0 + 0.1 / (n + 1.0))) ** 2 * (n + 1.0 / 6.0)
+    return 0.5 + math.copysign(0.5, z) * math.sqrt(max(0.0, 1.0 - math.exp(-x)))
+
+
+def _tree(S, K, T, r, q, sigma, is_call, n, lr=True):
+    dt = T / n
+    b = r - q
+    growth = math.exp(b * dt)
+    disc = math.exp(-r * dt)
+    if lr:
+        sq = sigma * math.sqrt(T)
+        d1 = (math.log(S / K) + (b + 0.5 * sigma ** 2) * T) / sq
+        d2 = d1 - sq
+        p = _peizer_pratt(d2, n)
+        pbar = _peizer_pratt(d1, n)
+        if not (0.0 < p < 1.0) or pbar <= 0.0:
+            return None
+        u = growth * pbar / p
+        d = (growth - p * u) / (1.0 - p)
+        if not (u > 0 and d > 0) or not (math.isfinite(u) and math.isfinite(d)):
+            return None
+    else:
+        u = math.exp(sigma * math.sqrt(dt))
+        d = 1.0 / u
+        p = (growth - d) / (u - d)
+        if not (0.0 <= p <= 1.0):
+            return None
+    lu, ld = math.log(u), math.log(d)
+    sign = 1.0 if is_call else -1.0
+
+    j = np.arange(n + 1, dtype=float)
+    ST = S * np.exp(j * lu + (n - j) * ld)
+    V = np.maximum(sign * (ST - K), 0.0)
+    for i in range(n - 1, -1, -1):
+        V = disc * (p * V[1:] + (1.0 - p) * V[:-1])
+        jj = j[: i + 1]
+        Si = S * np.exp(jj * lu + (i - jj) * ld)
+        np.maximum(V, sign * (Si - K), out=V)
+    return float(V[0])
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S, K, T, r, q, sigma = map(float, (S, K, T, r, q, sigma))
+    is_call = bool(is_call)
+    intrinsic = max(S - K, 0.0) if is_call else max(K - S, 0.0)
+
+    if T <= 0:
+        return intrinsic
+    if S <= 0:
+        return intrinsic if not is_call else 0.0
+    if K <= 0:
+        return intrinsic
+    if sigma <= 0:
+        # deterministic forward: best exercise time is at 0 or T
+        fwd = S * math.exp((r - q) * T)
+        sign = 1.0 if is_call else -1.0
+        at_T = math.exp(-r * T) * max(sign * (fwd - K), 0.0)
+        return max(intrinsic, at_T)
+
+    # American call without dividends (and r >= 0) is never exercised early
+    if is_call and q <= 0.0 and r >= 0.0:
+        return max(_bs_price(S, K, T, r, q, sigma, True), intrinsic)
+    # American put with r <= 0 and q >= r... early exercise not optimal only if r <= 0 and q <= 0
+    if (not is_call) and r <= 0.0 and q <= 0.0:
+        return max(_bs_price(S, K, T, r, q, sigma, False), intrinsic)
+
+    n = 1501  # odd, as required by Leisen-Reimer
+    val = _tree(S, K, T, r, q, sigma, is_call, n, lr=True)
+    if val is None or not math.isfinite(val):
+        # fallback: CRR with Richardson-style averaging of N and N+1 steps
+        n2 = 2000
+        v1 = _tree(S, K, T, r, q, sigma, is_call, n2, lr=False)
+        v2 = _tree(S, K, T, r, q, sigma, is_call, n2 + 1, lr=False)
+        if v1 is None or v2 is None:
+            return max(_bs_price(S, K, T, r, q, sigma, is_call), intrinsic)
+        val = 0.5 * (v1 + v2)
+
+    european = _bs_price(S, K, T, r, q, sigma, is_call)
+    return max(val, intrinsic, european)
+```

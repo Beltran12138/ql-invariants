@@ -1,0 +1,44 @@
+import numpy as np
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0:
+        return float(max(0.0, S - K if is_call else K - S))
+
+    if sigma <= 0:
+        if is_call:
+            A, a, B, b = S, q, K, r
+        else:
+            A, a, B, b = K, r, S, q
+
+        vals = [0.0, A - B, A * np.exp(-a * T) - B * np.exp(-b * T)]
+        if b != a and a * A > 0 and b * B > 0:
+            t_star = np.log((b * B) / (a * A)) / (b - a)
+            if 0.0 < t_star < T:
+                vals.append(A * np.exp(-a * t_star) - B * np.exp(-b * t_star))
+        return float(max(vals))
+
+    N = 1000
+    dt = T / N
+    log_u = sigma * np.sqrt(dt)
+    u = np.exp(log_u)
+    d = np.exp(-log_u)
+    drift = np.exp((r - q) * dt)
+    p = float(np.clip((drift - d) / (u - d), 1e-12, 1.0 - 1e-12))
+    discount = np.exp(-r * dt)
+
+    j = np.arange(N + 1)
+    spot = S * np.exp(log_u * (2 * j - N))
+
+    if is_call:
+        value = np.maximum(spot - K, 0.0)
+    else:
+        value = np.maximum(K - spot, 0.0)
+
+    for i in range(N - 1, -1, -1):
+        j = np.arange(i + 1)
+        spot = S * np.exp(log_u * (2 * j - i))
+        hold = discount * (p * value[1:] + (1.0 - p) * value[:-1])
+        exercise = spot - K if is_call else K - spot
+        value = np.maximum(exercise, hold)
+
+    return float(value[0])

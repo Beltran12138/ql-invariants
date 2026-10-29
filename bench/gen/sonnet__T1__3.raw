@@ -1,0 +1,144 @@
+```python
+import math
+import numpy as np
+from scipy.special import log_ndtr, ndtr
+
+_SQ2 = math.sqrt(2.0)
+_TPI = 2.0 * math.pi
+_TFRAC = 0.5 * (math.sqrt(5.0) - 1.0)
+_RHO = math.sqrt(_TFRAC)
+_u, _w = np.polynomial.legendre.leggauss(40)
+_RP = _RHO * (_u + 1.0) / 2.0
+_OM = 1.0 - _RP * _RP
+_CW = (_w * _RHO / 2.0 / (_TPI * np.sqrt(_OM)))[None, :]
+_OM2 = (2.0 * _OM)[None, :]
+_RP = _RP[None, :]
+_SGN = np.array([1.0, 1.0, -1.0, -1.0])[:, None]
+
+
+def _N(x):
+    return 0.5 * math.erfc(-x / _SQ2)
+
+
+def _bvn(h, k, sgn):
+    # Plackett 恒等式: M(h,k;rho) = N(h)N(k) + ∫_0^rho phi2(h,k;r) dr
+    hh = h[:, None]
+    kk = k[:, None]
+    ex = -(hh * hh + kk * kk - 2.0 * hh * kk * (sgn[:, None] * _RP)) / _OM2
+    return ndtr(h) * ndtr(k) + sgn * (np.exp(ex) * _CW).sum(axis=1)
+
+
+def _sexp(x):
+    return np.exp(np.minimum(x, 700.0))
+
+
+def _euro_call(S, K, T, r, q, s):
+    sq = s * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q) * T) / sq + 0.5 * sq
+    d2 = d1 - sq
+    return S * math.exp(-q * T) * _N(d1) - K * math.exp(-r * T) * _N(d2)
+
+
+def _call(S, K, T, r, q, s):
+    """美式看涨: Bjerksund-Stensland 2002, 带数值保护。"""
+    intrinsic = max(S - K, 0.0)
+    lo = max(_euro_call(S, K, T, r, q, s), intrinsic)
+    if q <= 0.0:
+        return lo  # 无提前行权价值
+    b = r - q
+    s2 = s * s
+    beta = (0.5 - b / s2) + math.sqrt((b / s2 - 0.5) ** 2 + 2.0 * r / s2)
+    if not beta > 1.0:
+        return lo
+    Binf = beta / (beta - 1.0) * K
+    B0 = max(K, r / q * K)
+    span = Binf - B0
+    t = _TFRAC * T
+    if span <= 1e-12 * K:
+        I1 = I2 = B0
+    else:
+        def trig(tau):
+            hh = -(b * tau + 2.0 * s * math.sqrt(tau)) * K * K / (span * B0)
+            return B0 + span * max(0.0, 1.0 - math.exp(min(hh, 700.0)))
+        I1 = trig(t)
+        I2 = trig(T)
+    if S >= I2:
+        return max(S - K, lo)
+
+    st = s * math.sqrt(t)
+    sT = s * math.sqrt(T)
+    al1 = I1 - K
+    al2 = I2 - K
+    lnS = math.log(S)
+    lnI1 = math.log(I1)
+    lnI2 = math.log(I2)
+
+    # phi 项 (时间 t, 触发价 I2), 顺序: β/I2, 1/I2, 1/I1, 0/I2, 0/I1, β/I1
+    g = np.array([beta, 1.0, 1.0, 0.0, 0.0, beta])
+    H = np.array([I2, I2, I1, I2, I1, I1])
+    ref = np.array([I2, 1.0, 1.0, 1.0, 1.0, I1])
+    mu = b + (g - 0.5) * s2
+    lam = -r + g * b + 0.5 * g * (g - 1.0) * s2
+    kap = 2.0 * b / s2 + 2.0 * g - 1.0
+    d = -(lnS - np.log(H) + mu * t) / st
+    lnIS = lnI2 - lnS
+    x = lam * t + g * (lnS - np.log(ref))
+    p = _sexp(x) * ndtr(d) - np.exp(
+        np.minimum(x + kap * lnIS + log_ndtr(d - 2.0 * lnIS / st), 700.0))
+
+    # psi 项, 顺序: β/I1, 1/I1, 1/K, 0/I1, 0/K
+    g = np.array([beta, 1.0, 1.0, 0.0, 0.0])
+    H = np.array([I1, I1, K, I1, K])
+    ref = np.array([I1, 1.0, 1.0, 1.0, 1.0])
+    mu = b + (g - 0.5) * s2
+    lam = -r + g * b + 0.5 * g * (g - 1.0) * s2
+    kap = 2.0 * b / s2 + 2.0 * g - 1.0
+    n = g.size
+    lH = np.log(H)
+    lSI1 = lnS - lnI1
+    lI2 = 2.0 * lnI2 - lnS - lnI1
+    mt = mu * t
+    mT = mu * T
+    e = np.empty((4, n))
+    f = np.empty((4, n))
+    e[0] = (lSI1 + mt) / st
+    e[1] = (lI2 + mt) / st
+    e[2] = (lSI1 - mt) / st
+    e[3] = (lI2 - mt) / st
+    f[0] = (lnS - lH + mT) / sT
+    f[1] = (2.0 * lnI2 - lnS - lH + mT) / sT
+    f[2] = (2.0 * lnI1 - lnS - lH + mT) / sT
+    f[3] = (lnS + 2.0 * lnI1 - lH - 2.0 * lnI2 + mT) / sT
+    sg = np.repeat(_SGN.ravel(), n)
+    M = _bvn((-e).ravel(), (-f).ravel(), sg).reshape(4, n)
+    k2 = kap * (lnI2 - lnS)
+    k1 = kap * (lnI1 - lnS)
+    k12 = kap * (lnI1 - lnI2)
+    br = (M[0] - _sexp(k2) * M[1] * (k2 <= 700.0)
+          - _sexp(k1) * M[2] * (k1 <= 700.0)
+          + _sexp(k12) * M[3] * (k12 <= 700.0))
+    ps = _sexp(lam * T + g * (lnS - np.log(ref))) * br
+
+    val = (al2 * math.exp(beta * (lnS - lnI2)) - al2 * p[0] + p[1] - p[2]
+           - K * p[3] + K * p[4] + al1 * p[5]
+           - al1 * ps[0] + ps[1] - ps[2] - K * ps[3] + K * ps[4])
+    val = float(val)
+    if not math.isfinite(val):
+        return lo
+    return min(max(val, lo), S)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S = float(S)
+    K = float(K)
+    T = float(T)
+    r = float(r)
+    q = float(q)
+    s = float(sigma)
+    if T <= 0.0 or s <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    if is_call:
+        return _call(S, K, T, r, q, s)
+    # 看涨看跌对称: P(S,K,r,q) = C(K,S,q,r)
+    return _call(K, S, T, q, r, s)
+```

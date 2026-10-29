@@ -1,0 +1,51 @@
+import numpy as np
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0.0:
+        payoff = S - K if is_call else K - S
+        return float(max(payoff, 0.0))
+
+    if sigma <= 0.0:
+        def value(t):
+            F = S * np.exp((r - q) * t)
+            payoff = F - K if is_call else K - F
+            return np.exp(-r * t) * max(payoff, 0.0)
+
+        t_candidates = [0.0, T]
+        if r != 0.0 and q != 0.0 and r != q and S > 0.0 and K > 0.0:
+            ratio = (q * S) / (r * K)
+            if ratio > 0.0:
+                t_star = np.log(ratio) / (r - q)
+                if 0.0 <= t_star <= T:
+                    t_candidates.append(t_star)
+        return float(max(value(t) for t in t_candidates))
+
+    N = 2000
+    dt = T / N
+    u = np.exp(sigma * np.sqrt(dt))
+    d = 1.0 / u
+    p = (np.exp((r - q) * dt) - d) / (u - d)
+    p = np.clip(p, 0.0, 1.0)
+    discount = np.exp(-r * dt)
+
+    j = np.arange(N + 1)
+    stock = S * np.exp((2.0 * j - N) * sigma * np.sqrt(dt))
+
+    if is_call:
+        V = np.maximum(stock - K, 0.0)
+    else:
+        V = np.maximum(K - stock, 0.0)
+
+    for i in range(N - 1, -1, -1):
+        stock = stock[:-1] * u
+
+        if is_call:
+            exercise = np.maximum(stock - K, 0.0)
+        else:
+            exercise = np.maximum(K - stock, 0.0)
+
+        cont = discount * (p * V[1:] + (1.0 - p) * V[:-1])
+        V = np.maximum(cont, exercise)
+
+    return float(V[0])

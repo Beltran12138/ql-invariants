@@ -1,0 +1,1 @@
+{"attempt": 1, "seconds": 242, "meta": "{\"finish\": \"STOP\", \"usage\": {\"promptTokenCount\": 276, \"candidatesTokenCount\": 1011, \"totalTokenCount\": 20098, \"promptTokensDetails\": [{\"modality\": \"TEXT\", \"tokenCount\": 276}], \"thoughtsTokenCount\": 18811, \"serviceTier\": \"standard\"}, \"stream\": true}"}

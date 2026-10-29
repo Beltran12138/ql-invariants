@@ -1,0 +1,162 @@
+import math
+from scipy.special import log_ndtr
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    bt = barrier_type.lower()
+    is_down = bt.startswith("down")
+    is_out = bt.endswith("out")
+
+    def logdiffexp(a, b):
+        if b == float("-inf"):
+            return a
+        if a == float("-inf"):
+            return float("-inf")
+        if a < b:
+            a, b = b, a
+        if a == b:
+            return float("-inf")
+        return a + math.log1p(-math.exp(b - a))
+
+    def sub_exp_logs(l1, l2):
+        if l1 == float("-inf") and l2 == float("-inf"):
+            return 0.0
+        if l1 >= l2:
+            if l1 == float("-inf"):
+                return 0.0
+            if l1 - l2 > 50.0:
+                logv = l1
+            else:
+                logv = l1 + math.log1p(-math.exp(l2 - l1))
+            if logv > 709.0:
+                return float("inf")
+            if logv < -745.0:
+                return 0.0
+            return math.exp(logv)
+        val = sub_exp_logs(l2, l1)
+        return -val
+
+    def call_above(spot, strike, lower, factor_log=0.0):
+        if spot <= 0.0 or strike <= 0.0:
+            return 0.0
+        L = strike if (lower is None or lower <= strike) else lower
+        if L <= 0.0:
+            L = strike
+
+        a = sigma * math.sqrt(T)
+        d1 = (math.log(spot / L) + (r - q + 0.5 * sigma * sigma) * T) / a
+        d2 = d1 - a
+
+        l1 = factor_log + math.log(spot) - q * T + log_ndtr(d1)
+        l2 = factor_log + math.log(strike) - r * T + log_ndtr(d2)
+        val = sub_exp_logs(l1, l2)
+        return max(0.0, val)
+
+    def put_below(spot, strike, upper, factor_log=0.0):
+        if spot <= 0.0 or strike <= 0.0:
+            return 0.0
+        U = strike if upper >= strike else upper
+        if U <= 0.0:
+            return 0.0
+
+        a = sigma * math.sqrt(T)
+        d1 = (math.log(spot / U) + (r - q + 0.5 * sigma * sigma) * T) / a
+        d2 = d1 - a
+
+        lK = factor_log + math.log(strike) - r * T + log_ndtr(-d2)
+        lS = factor_log + math.log(spot) - q * T + log_ndtr(-d1)
+        val = sub_exp_logs(lK, lS)
+        return max(0.0, val)
+
+    def call_below(spot, strike, upper, factor_log=0.0):
+        if upper <= strike:
+            return 0.0
+        if spot <= 0.0 or strike <= 0.0:
+            return 0.0
+
+        a = sigma * math.sqrt(T)
+        d1U = (math.log(spot / upper) + (r - q + 0.5 * sigma * sigma) * T) / a
+        d1K = (math.log(spot / strike) + (r - q + 0.5 * sigma * sigma) * T) / a
+        d2U = d1U - a
+        d2K = d1K - a
+
+        logp1 = logdiffexp(log_ndtr(-d1U), log_ndtr(-d1K))
+        logp2 = logdiffexp(log_ndtr(-d2U), log_ndtr(-d2K))
+
+        lS = factor_log + math.log(spot) - q * T + logp1
+        lK = factor_log + math.log(strike) - r * T + logp2
+        val = sub_exp_logs(lS, lK)
+        return max(0.0, val)
+
+    def put_interval_above(spot, strike, lower, factor_log=0.0):
+        if lower >= strike:
+            return 0.0
+        if spot <= 0.0 or strike <= 0.0:
+            return 0.0
+
+        a = sigma * math.sqrt(T)
+        d1B = (math.log(spot / lower) + (r - q + 0.5 * sigma * sigma) * T) / a
+        d1K = (math.log(spot / strike) + (r - q + 0.5 * sigma * sigma) * T) / a
+        d2B = d1B - a
+        d2K = d1K - a
+
+        logp2 = logdiffexp(log_ndtr(d2B), log_ndtr(d2K))
+        logp1 = logdiffexp(log_ndtr(d1B), log_ndtr(d1K))
+
+        lK = factor_log + math.log(strike) - r * T + logp2
+        lS = factor_log + math.log(spot) - q * T + logp1
+        val = sub_exp_logs(lK, lS)
+        return max(0.0, val)
+
+    if T <= 0.0:
+        intrinsic = max(S - K, 0.0) if is_call else max(K - S, 0.0)
+        return intrinsic if is_out else 0.0
+
+    if is_down:
+        breached = S <= H
+    else:
+        breached = S >= H
+
+    if is_call:
+        vanilla = call_above(S, K, 0.0, 0.0)
+    else:
+        vanilla = put_below(S, K, K, 0.0)
+
+    if breached:
+        return 0.0 if is_out else vanilla
+
+    B = H
+    Sprime = B * B / S
+    mu = r - q - 0.5 * sigma * sigma
+    b = math.log(B / S)
+    factor_log = 2.0 * mu * b / (sigma * sigma)
+
+    if is_down:
+        if is_call:
+            first = call_below(S, K, B, 0.0)
+            second = call_above(Sprime, K, B, factor_log)
+            in_price = first + second
+        else:
+            first = put_below(S, K, B, 0.0)
+            second = put_interval_above(Sprime, K, B, factor_log)
+            in_price = first + second
+    else:
+        if is_call:
+            first = call_above(S, K, B, 0.0)
+            second = call_below(Sprime, K, B, factor_log)
+            in_price = first + second
+        else:
+            first = put_interval_above(S, K, B, 0.0)
+            second = put_below(Sprime, K, B, factor_log)
+            in_price = first + second
+
+    if is_out:
+        price = vanilla - in_price
+    else:
+        price = in_price
+
+    if price < 0.0:
+        price = 0.0
+    if price > vanilla:
+        price = vanilla
+    return price

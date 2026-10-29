@@ -1,0 +1,93 @@
+import math
+import numpy as np
+from scipy.stats import norm
+
+
+def _black_scholes(S, K, T, r, q, sigma, is_call):
+    if T <= 0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    if sigma <= 1e-12:
+        fwd = S * math.exp((r - q) * T)
+        if is_call:
+            return math.exp(-r * T) * max(fwd - K, 0.0)
+        else:
+            return math.exp(-r * T) * max(K - fwd, 0.0)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * math.sqrt(T))
+    d2 = d1 - sigma * math.sqrt(T)
+    if is_call:
+        return S * math.exp(-q * T) * norm.cdf(d1) - K * math.exp(-r * T) * norm.cdf(d2)
+    else:
+        return K * math.exp(-r * T) * norm.cdf(-d2) - S * math.exp(-q * T) * norm.cdf(-d1)
+
+
+def _deterministic_american(S, K, T, r, q, is_call):
+    if T <= 0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    def f(t):
+        if is_call:
+            return S * math.exp(-q * t) - K * math.exp(-r * t)
+        else:
+            return K * math.exp(-r * t) - S * math.exp(-q * t)
+    candidates = [0.0, T]
+    if abs(q - r) > 1e-15 and q > 1e-15 and r > 1e-15:
+        ratio = (q * S) / (r * K)
+        if ratio > 0:
+            t = math.log(ratio) / (q - r)
+            if 0.0 < t < T:
+                candidates.append(t)
+    val = max(f(t) for t in candidates)
+    return max(val, 0.0)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    if sigma <= 1e-12:
+        return _deterministic_american(S, K, T, r, q, is_call)
+
+    N = max(1000, int(2000 * math.sqrt(T)))
+    N = min(N, 10000)
+    dt = T / N
+    s = sigma * math.sqrt(dt)
+
+    log_u = s
+    log_d = -s
+    p = (math.exp((r - q) * dt) - math.exp(log_d)) / (math.exp(log_u) - math.exp(log_d))
+
+    if p < 0.0 or p > 1.0:
+        mu = (r - q - 0.5 * sigma * sigma) * dt
+        log_u = mu + s
+        log_d = mu - s
+        p = 0.5
+
+    disc = math.exp(-r * dt)
+
+    j = np.arange(N + 1, dtype=float)
+    ST = S * np.exp(N * log_d + j * (log_u - log_d))
+    if is_call:
+        payoff = np.maximum(ST - K, 0.0)
+    else:
+        payoff = np.maximum(K - ST, 0.0)
+
+    V_am = payoff.copy()
+    V_eu = payoff.copy()
+
+    for i in range(N - 1, -1, -1):
+        j_i = np.arange(i + 1, dtype=float)
+        Si = S * np.exp(i * log_d + j_i * (log_u - log_d))
+
+        cont_am = disc * (p * V_am[1:i+2] + (1.0 - p) * V_am[0:i+1])
+        cont_eu = disc * (p * V_eu[1:i+2] + (1.0 - p) * V_eu[0:i+1])
+
+        if is_call:
+            intrinsic = np.maximum(Si - K, 0.0)
+        else:
+            intrinsic = np.maximum(K - Si, 0.0)
+
+        V_am = np.maximum(cont_am, intrinsic)
+        V_eu = cont_eu
+
+    american_tree = V_am[0]
+    european_tree = V_eu[0]
+    european_bs = _black_scholes(S, K, T, r, q, sigma, is_call)
+    return american_tree - european_tree + european_bs

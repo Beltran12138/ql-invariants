@@ -1,0 +1,153 @@
+import math
+
+_SQRT2 = math.sqrt(2.0)
+
+def _N(x):
+    return 0.5 * math.erfc(-x / _SQRT2)
+
+def _bs_call(S, K, T, r, b, sigma):
+    if T <= 0.0:
+        return max(S - K, 0.0)
+    if S <= 0.0:
+        return 0.0
+    v = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (b + 0.5 * sigma * sigma) * T) / v
+    d2 = d1 - v
+    return S * math.exp((b - r) * T) * _N(d1) - K * math.exp(-r * T) * _N(d2)
+
+def _bs_put(S, K, T, r, b, sigma):
+    if T <= 0.0:
+        return max(K - S, 0.0)
+    if S <= 0.0:
+        return K * math.exp(-r * T)
+    v = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (b + 0.5 * sigma * sigma) * T) / v
+    d2 = d1 - v
+    return K * math.exp(-r * T) * _N(-d2) - S * math.exp((b - r) * T) * _N(-d1)
+
+def _american_call(S, K, T, r, q, sigma):
+    b = r - q
+    if T <= 0.0 or q <= 0.0:
+        return _bs_call(S, K, T, r, b, sigma)
+    if S <= 0.0:
+        return 0.0
+
+    ss = sigma * sigma
+    if abs(r * T) < 1e-10:
+        ratio = 2.0 / (ss * T)
+    else:
+        kappa = -math.expm1(-r * T)
+        ratio = (2.0 * r / ss) / kappa
+
+    A = 2.0 * b / ss - 1.0
+    disc = A * A + 4.0 * ratio
+    if disc < 0.0:
+        disc = 0.0
+    q2 = (-A + math.sqrt(disc)) * 0.5
+    if q2 <= 1.0 + 1e-12:
+        q2 = 1.0 + 1e-12
+
+    x = b / ss
+    discb = (x - 0.5) * (x - 0.5) + 2.0 * r / ss
+    if discb < 0.0:
+        discb = 0.0
+    beta = 0.5 - x + math.sqrt(discb)
+    if beta <= 1.0 + 1e-12:
+        B_inf = K * 1e12
+    else:
+        B_inf = beta / (beta - 1.0) * K
+
+    if B_inf > 1e6 * K:
+        return _bs_call(S, K, T, r, b, sigma)
+
+    def F(ss_):
+        d1 = (math.log(ss_ / K) + (b + 0.5 * sigma * sigma) * T) / (sigma * math.sqrt(T))
+        c = _bs_call(ss_, K, T, r, b, sigma)
+        A2 = (ss_ / q2) * (1.0 - math.exp((b - r) * T) * _N(d1))
+        return ss_ - K - c - A2
+
+    low = K
+    high = max(B_inf, K * 1.01)
+    while high < 1e6 * K and F(high) < 0.0:
+        high *= 2.0
+    if F(high) < 0.0:
+        return _bs_call(S, K, T, r, b, sigma)
+
+    for _ in range(45):
+        mid = 0.5 * (low + high)
+        if F(mid) >= 0.0:
+            high = mid
+        else:
+            low = mid
+
+    S_star = 0.5 * (low + high)
+    if S >= S_star:
+        return S - K
+
+    d1 = (math.log(S_star / K) + (b + 0.5 * sigma * sigma) * T) / (sigma * math.sqrt(T))
+    A2 = (S_star / q2) * (1.0 - math.exp((b - r) * T) * _N(d1))
+    if A2 < 0.0:
+        A2 = 0.0
+
+    c = _bs_call(S, K, T, r, b, sigma)
+    ratio_s = S / S_star
+    expo = q2 * math.log(ratio_s)
+    premium = 0.0 if expo < -745.0 else A2 * math.exp(expo)
+    return c + max(premium, 0.0)
+
+def _american_put(S, K, T, r, q, sigma):
+    b = r - q
+    if T <= 0.0 or r <= 0.0:
+        return _bs_put(S, K, T, r, b, sigma)
+    if S <= 0.0:
+        return K
+
+    ss = sigma * sigma
+    if abs(r * T) < 1e-10:
+        ratio = 2.0 / (ss * T)
+    else:
+        kappa = -math.expm1(-r * T)
+        ratio = (2.0 * r / ss) / kappa
+
+    A = 2.0 * b / ss - 1.0
+    disc = A * A + 4.0 * ratio
+    if disc < 0.0:
+        disc = 0.0
+    q1 = (-A - math.sqrt(disc)) * 0.5
+    if q1 >= -1e-12:
+        q1 = -1e-12
+
+    def F(ss_):
+        d1 = (math.log(ss_ / K) + (b + 0.5 * sigma * sigma) * T) / (sigma * math.sqrt(T))
+        p = _bs_put(ss_, K, T, r, b, sigma)
+        A1 = -(ss_ / q1) * (1.0 - math.exp((b - r) * T) * _N(-d1))
+        return K - ss_ - p - A1
+
+    low = K * 1e-12
+    high = K
+    for _ in range(45):
+        mid = 0.5 * (low + high)
+        if F(mid) >= 0.0:
+            low = mid
+        else:
+            high = mid
+
+    S_star = 0.5 * (low + high)
+    if S <= S_star:
+        return K - S
+
+    d1 = (math.log(S_star / K) + (b + 0.5 * sigma * sigma) * T) / (sigma * math.sqrt(T))
+    A1 = -(S_star / q1) * (1.0 - math.exp((b - r) * T) * _N(-d1))
+    if A1 < 0.0:
+        A1 = 0.0
+
+    p = _bs_put(S, K, T, r, b, sigma)
+    ratio_s = S / S_star
+    expo = q1 * math.log(ratio_s)
+    premium = 0.0 if expo < -745.0 else A1 * math.exp(expo)
+    return p + max(premium, 0.0)
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if is_call:
+        return _american_call(S, K, T, r, q, sigma)
+    return _american_put(S, K, T, r, q, sigma)

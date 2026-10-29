@@ -1,0 +1,62 @@
+import numpy as np
+from scipy.stats import norm
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    phi = 1 if is_call else -1
+    eta = 1 if barrier_type.startswith("down") else -1
+
+    if eta == 1 and S <= H:
+        if "out" in barrier_type:
+            return 0.0
+    elif eta == -1 and S >= H:
+        if "out" in barrier_type:
+            return 0.0
+
+    sqT = sigma * np.sqrt(T)
+    lam = (r - q + 0.5 * sigma**2) / sigma**2
+
+    d1 = (np.log(S / K) + (r - q + 0.5 * sigma**2) * T) / sqT
+    d2 = d1 - sqT
+
+    x1 = (np.log(S / H) + (r - q + 0.5 * sigma**2) * T) / sqT
+    x2 = x1 - sqT
+
+    y1 = (np.log(H**2 / (S * K)) + (r - q + 0.5 * sigma**2) * T) / sqT
+    y2 = y1 - sqT
+
+    z1 = (np.log(H / S) + (r - q + 0.5 * sigma**2) * T) / sqT
+    z2 = z1 - sqT
+
+    A = phi * S * np.exp(-q * T) * norm.cdf(phi * d1) - phi * K * np.exp(-r * T) * norm.cdf(phi * d2)
+
+    if (eta == 1 and S <= H) or (eta == -1 and S >= H):
+        return A
+
+    B = phi * S * np.exp(-q * T) * norm.cdf(phi * x1) - phi * K * np.exp(-r * T) * norm.cdf(phi * x2)
+
+    def safe_term(S_or_K, rate, power, y_or_z):
+        log_mult = -rate * T + power * np.log(H / S)
+        log_prob = norm.logcdf(eta * y_or_z)
+        return S_or_K * np.exp(log_mult + log_prob)
+
+    C = phi * safe_term(S, q, 2 * lam, y1) - phi * safe_term(K, r, 2 * lam - 2, y2)
+    D = phi * safe_term(S, q, 2 * lam, z1) - phi * safe_term(K, r, 2 * lam - 2, z2)
+
+    if is_call:
+        if barrier_type == "down-and-in":
+            return C if K >= H else A - B + D
+        elif barrier_type == "down-and-out":
+            return A - C if K >= H else B - D
+        elif barrier_type == "up-and-in":
+            return A if K >= H else B + C - D
+        elif barrier_type == "up-and-out":
+            return 0.0 if K >= H else A - B - C + D
+    else:
+        if barrier_type == "down-and-in":
+            return B + C - D if K >= H else A
+        elif barrier_type == "down-and-out":
+            return A - B - C + D if K >= H else 0.0
+        elif barrier_type == "up-and-in":
+            return A - B + D if K >= H else C
+        elif barrier_type == "up-and-out":
+            return B - D if K >= H else A - C

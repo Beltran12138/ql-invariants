@@ -1,0 +1,145 @@
+import numpy as np
+from scipy.stats import norm
+
+
+def _log_phi_diff(z_lo, z_hi):
+    """Return log(Phi(z_hi) - Phi(z_lo)) for z_lo < z_hi."""
+    if z_lo >= z_hi:
+        return -np.inf
+
+    if np.isneginf(z_lo):
+        if np.isposinf(z_hi):
+            return 0.0
+        return norm.logcdf(z_hi)
+
+    if np.isposinf(z_hi):
+        return norm.logcdf(-z_lo)
+
+    # Both finite
+    if z_lo > 0.0:
+        # Use upper tail: Phi(hi)-Phi(lo) = Q(lo)-Q(hi)
+        log_q_lo = norm.logcdf(-z_lo)
+        log_q_hi = norm.logcdf(-z_hi)
+        if log_q_lo == -np.inf:
+            return -np.inf
+        if log_q_hi == -np.inf:
+            return log_q_lo
+        delta = log_q_hi - log_q_lo
+        if delta < -745.0:
+            return log_q_lo
+        return log_q_lo + np.log1p(-np.exp(delta))
+    else:
+        log_phi_hi = norm.logcdf(z_hi)
+        log_phi_lo = norm.logcdf(z_lo)
+        if log_phi_hi == -np.inf:
+            return -np.inf
+        if log_phi_lo == -np.inf:
+            return log_phi_hi
+        delta = log_phi_lo - log_phi_hi
+        if delta < -745.0:
+            return log_phi_hi
+        return log_phi_hi + np.log1p(-np.exp(delta))
+
+
+def _coeff_phi_diff(log_coef, z_lo, z_hi):
+    """Return exp(log_coef) * (Phi(z_hi) - Phi(z_lo)) robustly."""
+    if z_lo >= z_hi:
+        return 0.0
+
+    log_diff = _log_phi_diff(z_lo, z_hi)
+    if np.isneginf(log_diff):
+        return 0.0
+
+    log_res = log_coef + log_diff
+    if log_res < -745.0:
+        return 0.0
+    if log_res > 709.0:
+        return np.inf
+    return np.exp(log_res)
+
+
+def _integral_price(S, K, T, r, sigma, m, v, L, U, is_call, log_mult=0.0):
+    """
+    exp(log_mult) * e^{-rT} * E[g(S e^Y) 1_{L < Y < U}],
+    where Y ~ N(m, v), and g is call or put payoff.
+    """
+    s = np.sqrt(v)
+    k = np.log(K / S)
+
+    if is_call:
+        lower = max(L, k)
+        upper = U
+        if lower >= upper:
+            return 0.0
+    else:
+        lower = L
+        upper = min(U, k)
+        if lower >= upper:
+            return 0.0
+
+    log_S_c = np.log(S) - r * T + m + 0.5 * v + log_mult
+    log_K_c = np.log(K) - r * T + log_mult
+
+    zS_lo = (lower - (m + v)) / s
+    zS_hi = (upper - (m + v)) / s
+    zP_lo = (lower - m) / s
+    zP_hi = (upper - m) / s
+
+    S_term = _coeff_phi_diff(log_S_c, zS_lo, zS_hi)
+    K_term = _coeff_phi_diff(log_K_c, zP_lo, zP_hi)
+
+    if is_call:
+        return max(0.0, S_term - K_term)
+    return max(0.0, K_term - S_term)
+
+
+def _vanilla(S, K, T, r, q, sigma, is_call):
+    s = sigma * np.sqrt(T)
+    d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / s
+    d2 = d1 - s
+
+    if is_call:
+        price = S * np.exp(-q * T) * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    else:
+        price = K * np.exp(-r * T) * norm.cdf(-d2) - S * np.exp(-q * T) * norm.cdf(-d1)
+
+    return max(0.0, price)
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    """
+    European single-barrier option price under Black-Scholes with continuous
+    monitoring, continuous dividend yield q, and no rebate.
+    """
+    bt = barrier_type.lower()
+    if bt not in ("down-and-out", "down-and-in", "up-and-out", "up-and-in"):
+        raise ValueError("invalid barrier_type")
+
+    vanilla = _vanilla(S, K, T, r, q, sigma, is_call)
+
+    if bt in ("down-and-out", "down-and-in"):
+        if S <= H:
+            return 0.0 if bt == "down-and-out" else vanilla
+        a = np.log(H / S)
+        L, U = a, np.inf
+    else:
+        if S >= H:
+            return 0.0 if bt == "up-and-out" else vanilla
+        a = np.log(H / S)
+        L, U = -np.inf, a
+
+    nu = r - q - 0.5 * sigma ** 2
+    m1 = nu * T
+    v = sigma ** 2 * T
+    log_mult = 2.0 * nu * a / (sigma ** 2)
+    m2 = m1 + 2.0 * a
+
+    term1 = _integral_price(S, K, T, r, sigma, m1, v, L, U, is_call, 0.0)
+    term2 = _integral_price(S, K, T, r, sigma, m2, v, L, U, is_call, log_mult)
+
+    ko = term1 - term2
+    ko = max(0.0, min(vanilla, ko))
+
+    if bt.endswith("-out"):
+        return ko
+    return vanilla - ko

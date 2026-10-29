@@ -1,0 +1,136 @@
+```python
+import math
+import numpy as np
+from scipy.special import ndtr
+
+# 美式看跌期权：Kim 积分方程 + 光滑粘贴/价值匹配不动点迭代（Chebyshev 配点 + Gauss-Legendre 求积），
+# 看涨通过 put-call 对称性 C(S,K,r,q) = P(K,S,q,r) 转换。
+_PI = math.pi
+
+
+def _bary(zk, wk, z):
+    d = z[:, None] - zk[None, :]
+    hit = np.abs(d) < 1e-14
+    t = wk[None, :] / np.where(hit, 1.0, d)
+    M = t / t.sum(1, keepdims=True)
+    rows = hit.any(1)
+    if rows.any():
+        M[rows] = hit[rows].astype(float)
+    return M
+
+
+def _setup(n, l1, l2):
+    k = np.arange(n)
+    zk = -np.cos(_PI * k / (n - 1))
+    wk = (-1.0) ** k
+    wk[0] *= 0.5
+    wk[-1] *= 0.5
+    frac = (1 + zk[1:]) ** 2 / 4  # tau_k / T
+    xi, om = np.polynomial.legendre.leggauss(l1)
+    th = _PI * (xi + 1) / 2
+    c = np.cos(th)
+    ufr = frac[:, None] * (1 - c[None, :]) / 2
+    sfr = frac[:, None] * (1 + c[None, :]) / 2
+    wfr = frac[:, None] * (np.sin(th) / 2 * _PI / 2 * om)[None, :]
+    M1 = _bary(zk, wk, (2 * np.sqrt(ufr) - 1).ravel())
+    xi2, om2 = np.polynomial.legendre.leggauss(l2)
+    th2 = _PI * (xi2 + 1) / 2
+    c2 = np.cos(th2)
+    sfr2 = (1 + c2) / 2
+    wfr2 = np.sin(th2) / 2 * _PI / 2 * om2
+    M2 = _bary(zk, wk, 2 * np.sqrt((1 - c2) / 2) - 1)
+    return (n, l1, frac, np.sqrt(frac), sfr, wfr, M1, sfr2, wfr2, M2)
+
+
+_FAST = _setup(9, 7, 18)
+_FINE = _setup(12, 10, 30)
+_HEAVY = _setup(16, 14, 40)
+
+
+def _bs_put(S, K, T, r, q, sigma):
+    sq = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sq
+    return K * math.exp(-r * T) * ndtr(-(d1 - sq)) - S * math.exp(-q * T) * ndtr(-d1)
+
+
+def _tree_put(S, K, T, r, q, sigma, n=600):
+    # 仅用于双边界角落 (q < r < 0)：Jarrow-Rudd 二叉树（p=1/2，任何参数下概率合法）
+    dt = T / n
+    sd = sigma * math.sqrt(dt)
+    nu = (r - q - 0.5 * sigma * sigma) * dt
+    lS = math.log(S)
+    v = np.maximum(K - np.exp(lS + n * nu + sd * (2 * np.arange(n + 1) - n)), 0.0)
+    disc = math.exp(-r * dt) * 0.5
+    for i in range(n - 1, -1, -1):
+        v = disc * (v[1:] + v[:-1])
+        v = np.maximum(v, K - np.exp(lS + i * nu + sd * (2 * np.arange(i + 1) - i)))
+    return float(v[0])
+
+
+def _put_single(S, K, T, r, q, sigma):
+    """单边界区域 (r>0，或 r==0 且 q<0) 的美式看跌。"""
+    eur = _bs_put(S, K, T, r, q, sigma)
+    if sigma * math.sqrt(T) < 0.2 and max(r, abs(q)) * T > 0.3:
+        tab, iters, tol = _HEAVY, 24, 1e-4
+    elif max(r, q) * T > 1.5:
+        tab, iters, tol = _FINE, 12, 3e-4
+    else:
+        tab, iters, tol = _FAST, 6, 3e-3
+    n, l1, frac, sqf, sfr, wfr, M1, sfr2, wfr2, M2 = tab
+    nn = n - 1
+    X = K * min(1.0, r / q) if q > 0 else K  # tau=0 时的边界
+    lnXK = math.log(X / K)
+    sig2 = sigma * sigma
+    mu = r - q - 0.5 * sig2
+    sT = sigma * math.sqrt(T)
+    tau = T * frac
+    sqt = sT * sqf
+    S1 = T * sfr
+    sqs = np.sqrt(S1)
+    inv = 1.0 / (sigma * sqs)
+    cm = mu * S1 * inv
+    invt = 1.0 / sqt
+    ct = (mu * tau + lnXK) * invt
+    W2 = np.stack((r * wfr * T * np.exp(-r * S1), q * wfr * T * np.exp(-q * S1)))
+    E2 = np.stack((np.exp(-r * tau), np.exp(-q * tau)))
+    off = np.stack((np.zeros(nn), sqt))
+    ssq2 = np.stack((np.zeros_like(sqs), sigma * sqs))
+    # 初值：用永续边界做 tanh 插值
+    ba = 0.5 - (r - q) / sig2
+    beta = ba - math.sqrt(ba * ba + 2 * r / sig2)
+    binf = min(math.log(max(K * beta / (beta - 1), 1e-300) / X), -1e-12)
+    g = binf * np.tanh(0.8 * sT * sqf / (-binf))
+    qv = np.empty(n)  # qv = ln(B/X)^2
+    qv[0] = 0.0
+    qv[1:] = g * g
+    kx = K / X
+    for _ in range(iters):
+        sq_ = np.sqrt(np.maximum(M1 @ qv, 0.0)).reshape(nn, l1)
+        sqi = np.sqrt(qv[1:])
+        dm = (sq_ - sqi[:, None]) * inv + cm
+        res = E2 * ndtr(ct - sqi * invt + off) + (ndtr(dm + ssq2) * W2).sum(2)
+        qn = np.minimum(np.log(kx * res[0] / res[1]), -1e-12) ** 2
+        dlt = np.abs(qn - qv[1:]).max()
+        qv[1:] = qn
+        if dlt < tol * qn.max():
+            break
+    if S <= X * math.exp(-math.sqrt(qv[-1])):
+        return K - S
+    s = T * sfr2
+    ss = sigma * np.sqrt(s)
+    dm = (math.log(S / X) + np.sqrt(np.maximum(M2 @ qv, 0.0)) + mu * s) / ss
+    dp = dm + ss
+    prem = (wfr2 * T * (r * K * np.exp(-r * s) * ndtr(-dm) - q * S * np.exp(-q * s) * ndtr(-dp))).sum()
+    return max(eur + float(prem), K - S, eur)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if is_call:
+        S, K, r, q = K, S, q, r
+    if r > 0 or (r == 0 and q < 0):
+        return float(_put_single(S, K, T, r, q, sigma))
+    eur = _bs_put(S, K, T, r, q, sigma)
+    if r < 0 and q < r:
+        return max(_tree_put(S, K, T, r, q, sigma), eur, K - S)
+    return max(eur, K - S)
+```

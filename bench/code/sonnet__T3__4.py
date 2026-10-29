@@ -1,0 +1,92 @@
+import math
+import numpy as np
+from scipy.special import ndtr, log_ndtr
+
+
+def _bs_vanilla(S, K, T, r, q, sigma, is_call):
+    sqT = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / sqT
+    d2 = d1 - sqT
+    if is_call:
+        return S * math.exp(-q * T) * ndtr(d1) - K * math.exp(-r * T) * ndtr(d2)
+    return K * math.exp(-r * T) * ndtr(-d2) - S * math.exp(-q * T) * ndtr(-d1)
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    """连续监测单障碍欧式期权(无 rebate),Reiner-Rubinstein 解析解。"""
+    bt = barrier_type.lower().replace("_", "-").replace(" ", "-")
+    if bt not in ("down-and-out", "down-and-in", "up-and-out", "up-and-in"):
+        raise ValueError("unknown barrier_type: %r" % (barrier_type,))
+    down = bt.startswith("down")
+    knock_in = bt.endswith("-in")
+
+    S = float(S); K = float(K); H = float(H); T = float(T)
+    r = float(r); q = float(q); sigma = float(sigma)
+    is_call = bool(is_call)
+
+    vanilla = _bs_vanilla(S, K, T, r, q, sigma, is_call)
+
+    # 起始即触碰障碍
+    if (down and S <= H) or ((not down) and S >= H):
+        return float(vanilla) if knock_in else 0.0
+
+    phi = 1.0 if is_call else -1.0
+    eta = 1.0 if down else -1.0
+
+    b = r - q
+    sqT = sigma * math.sqrt(T)
+    mu = (b - 0.5 * sigma ** 2) / sigma ** 2
+    shift = (1.0 + mu) * sqT
+
+    x1 = math.log(S / K) / sqT + shift
+    x2 = math.log(S / H) / sqT + shift
+    y1 = math.log(H * H / (S * K)) / sqT + shift
+    y2 = math.log(H / S) / sqT + shift
+
+    dq = S * math.exp(-q * T)
+    dk = K * math.exp(-r * T)
+
+    A = phi * dq * ndtr(phi * x1) - phi * dk * ndtr(phi * x1 - phi * sqT)
+    B = phi * dq * ndtr(phi * x2) - phi * dk * ndtr(phi * x2 - phi * sqT)
+
+    # C, D 含 (H/S)^(2mu) 这类可能溢出/下溢的幂,与 N(.) 合并在对数域计算
+    lnHS = math.log(H / S)
+    lnS = math.log(S)
+    lnK = math.log(K)
+
+    def _cd(y):
+        t1 = math.exp(lnS - q * T + 2.0 * (mu + 1.0) * lnHS + float(log_ndtr(eta * y)))
+        t2 = math.exp(lnK - r * T + 2.0 * mu * lnHS + float(log_ndtr(eta * y - eta * sqT)))
+        return phi * t1 - phi * t2
+
+    C = _cd(y1)
+    D = _cd(y2)
+
+    kgh = K > H
+    if knock_in:
+        if is_call:
+            if down:
+                v = C if kgh else A - B + D
+            else:
+                v = A if kgh else B - C + D
+        else:
+            if down:
+                v = B - C + D if kgh else A
+            else:
+                v = A - B + D if kgh else C
+    else:
+        if is_call:
+            if down:
+                v = A - C if kgh else B - D
+            else:
+                v = 0.0 if kgh else A - B + C - D
+        else:
+            if down:
+                v = A - B + C - D if kgh else 0.0
+            else:
+                v = B - D if kgh else A - C
+
+    v = float(v)
+    if not np.isfinite(v):
+        v = 0.0
+    return float(min(max(v, 0.0), max(vanilla, 0.0)))

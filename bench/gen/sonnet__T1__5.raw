@@ -1,0 +1,90 @@
+```python
+import math
+import numpy as np
+from scipy.special import gammaln, ndtr
+
+_SQ2 = math.sqrt(2.0)
+_N = 51          # 树步数 (奇数, Leisen-Reimer 要求)
+_cache = {}
+
+
+def _ncdf(x):
+    return 0.5 * math.erfc(-x / _SQ2)
+
+
+def _bs(S, K, T, r, q, sigma, phi):
+    sv = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q) * T) / sv + 0.5 * sv
+    return phi * (S * math.exp(-q * T) * _ncdf(phi * d1)
+                  - K * math.exp(-r * T) * _ncdf(phi * (d1 - sv)))
+
+
+def _pp(z, n):
+    # Peizer-Pratt 反演 (方法 2)
+    t = z / (n + 1.0 / 3.0 + 0.1 / (n + 1.0))
+    v = 0.25 - 0.25 * math.exp(-t * t * (n + 1.0 / 6.0))
+    return 0.5 + math.copysign(math.sqrt(max(v, 0.0)), z)
+
+
+def _grids(N):
+    g = _cache.get(N)
+    if g is None:
+        i = np.arange(N, dtype=float)
+        lg = gammaln(N * 1.0) - gammaln(i + 1.0) - gammaln(N - i * 1.0)
+        g = (i[:, None], i[None, :], lg, i)
+        _cache[N] = g
+    return g
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    phi = 1.0 if is_call else -1.0
+    euro = _bs(S, K, T, r, q, sigma, phi)
+    # 无提前行权价值: 看涨需 q>0 或 r<q; 看跌需 r>0 或 q<r (对称性 C(S,K,r,q)=P(K,S,q,r))
+    if is_call:
+        if q <= 0.0 and r >= q:
+            return euro
+    elif r <= 0.0 and q >= r:
+        return euro
+
+    N = _N
+    M = N - 1
+    dt = T / N
+    sv = sigma * math.sqrt(T)
+    b = r - q
+    d2 = (math.log(S / K) + b * T) / sv - 0.5 * sv
+    d2 = min(4.0, max(-4.0, d2))        # 限幅仅影响树形状, 支付仍用真实 K
+    d1 = d2 + sv
+    p = _pp(d2, N)
+    pq = _pp(d1, N)
+    eb = math.exp(b * dt)
+    lu = math.log(eb * pq / p)
+    ld = math.log(eb * (1.0 - pq) / (1.0 - p))
+    disc = math.exp(-r * dt)
+
+    I, J, lg, i = _grids(N)
+    St = S * np.exp(I * ld + J * (lu - ld))
+    pay = np.maximum(phi * (St - K), 0.0)
+
+    # Broadie-Detemple: 倒数第二层用 BS 解析值替代继续持有价值
+    sN = St[M]
+    svd = sigma * math.sqrt(dt)
+    e1 = (np.log(sN / K) + b * dt) / svd + 0.5 * svd
+    bsv = phi * (sN * math.exp(-q * dt) * ndtr(phi * e1)
+                 - K * disc * ndtr(phi * (e1 - svd)))
+    V = np.maximum(bsv, pay[M])
+
+    pd_ = disc * p
+    qd_ = disc * (1.0 - p)
+    for n in range(M - 1, -1, -1):
+        V = np.maximum(pd_ * V[1:n + 2] + qd_ * V[:n + 1], pay[n, :n + 1])
+
+    # 控制变量: 同一棵树上的欧式价与 BS 解析欧式价之差
+    pmf = np.exp(lg + i * math.log(p) + (M - i) * math.log(1.0 - p))
+    ev = disc ** M * float(pmf @ bsv)
+    v = float(V[0]) + (euro - ev)
+    ub = S * max(1.0, math.exp(-q * T)) if is_call else K * max(1.0, math.exp(-r * T))
+    return min(max(v, euro, phi * (S - K)), ub)
+
+
+_grids(_N)
+```

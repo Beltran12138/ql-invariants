@@ -1,0 +1,167 @@
+import math
+from functools import lru_cache
+
+import numpy as np
+from scipy.special import ndtr
+
+# American option under Black-Scholes with continuous dividend yield.
+#
+# Calls are mapped to puts via put-call symmetry C(S, K, r, q) = P(K, S, q, r); for the put
+#   * r > 0 (or r = 0, q < 0): one lower exercise boundary, solved with the Andersen-Lake-Offengelt
+#     integral-equation method (Chebyshev collocation in sqrt(tau), fixed-point system FP-A);
+#   * r <= 0 and q >= r: early exercise is never optimal, European price;
+#   * q < r < 0: two exercise boundaries, binomial tree with BBS smoothing and Richardson extrapolation
+#     (accuracy about 1e-4 relative there, versus about 1e-6 for the integral-equation branch).
+
+_NC = 12          # Chebyshev degree of the exercise-boundary interpolant
+_ITERS = 12       # fixed-point iterations
+_EPS = 1e-6       # end of the innermost quadrature segment, as a fraction of the interval
+_TREE_N = 64      # tree steps in the double-boundary case (extrapolated with TREE_N / 2)
+
+
+def _graded_rule(na, nb, nc):
+    # Rule on x in (0, 1): sqrt map on (0, EPS), Gauss-Legendre in log x on (EPS, 1/2), sqrt map
+    # at x = 1 on (1/2, 1).  Points cluster at both ends, so layers of any width are resolved
+    # without parameter-dependent grids.
+    ya, wa = np.polynomial.legendre.leggauss(na)
+    va = 0.5 * (1.0 + ya)
+    yb, wb = np.polynomial.legendre.leggauss(nb)
+    lo, hi = math.log(_EPS), math.log(0.5)
+    xb = np.exp(lo + 0.5 * (hi - lo) * (1.0 + yb))
+    yc, wc = np.polynomial.legendre.leggauss(nc)
+    vc = 0.5 * (1.0 + yc)
+    x = np.concatenate((_EPS * va * va, xb, 1.0 - 0.5 * vc * vc))
+    w = np.concatenate((_EPS * va * wa, 0.5 * (hi - lo) * xb * wb, 0.5 * vc * wc))
+    return x, w
+
+
+def _interp_matrix(frac):
+    # maps boundary values at the Chebyshev nodes to values at u / T = frac
+    k = np.arange(_NC + 1)
+    zc = -np.cos(np.pi * k / _NC)
+    vinv = np.linalg.inv(np.cos(np.outer(np.arccos(zc), k)))
+    z = np.clip(2.0 * np.sqrt(frac) - 1.0, -1.0, 1.0)
+    return np.cos(np.multiply.outer(np.arccos(z), k)) @ vinv
+
+
+def _setup():
+    k = np.arange(1, _NC + 1)
+    tf = 0.25 * (1.0 - np.cos(np.pi * k / _NC)) ** 2        # tau_i / T at the nodes (node 0 is tau = 0)
+    x, w = _graded_rule(4, 14, 8)                            # x = (tau_i - u) / tau_i
+    m = x.size
+    xs = np.append(x, 1.0)                                   # last column: the non-integral term
+    M = np.zeros((_NC, m + 1, _NC + 1))
+    M[:, :m, :] = _interp_matrix((tf[:, None] * (1.0 - x)).ravel()).reshape(_NC, m, _NC + 1)
+    xf, wf = _graded_rule(4, 20, 12)                         # premium integral, x = t / T
+    return tf, xs, w, M.reshape(_NC * (m + 1), _NC + 1), xf, wf, _interp_matrix(1.0 - xf)
+
+
+_TF, _XS, _WS, _M, _XF, _WF, _MF = _setup()
+
+
+@lru_cache(maxsize=4096)
+def _boundary(T, r, q, sig):
+    # Exercise boundary B(tau) of the K = 1 put with a single lower boundary, from
+    #   B = exp(-(r-q) tau) N / D,
+    #   N = Phi(d-(tau, B)) + r int_0^tau e^{r u} Phi(d-(tau - u, B(tau)/B(u))) du,
+    #   D = Phi(d+(tau, B)) + q int_0^tau e^{q u} Phi(d+(tau - u, B(tau)/B(u))) du.
+    # Returns H = ln(B / X)^2 at the Chebyshev nodes and ln X, X = B(0+).
+    b = r - q
+    v2 = sig * sig
+    X = min(1.0, r / q) if q > 0.0 else 1.0
+    lnX = math.log(X)
+    tau = (T * _TF)[:, None]
+    s = tau * _XS
+    u = tau - s
+    sq = sig * np.sqrt(s)
+    st = sq[:, -1]
+    w = np.empty((2,) + s.shape)
+    w[0, :, :-1] = r * tau * _WS * np.exp(r * u[:, :-1])
+    w[1, :, :-1] = q * tau * _WS * np.exp(q * u[:, :-1])
+    w[:, :, -1] = 1.0
+    isq = np.broadcast_to(1.0 / sq, w.shape)
+    off = np.empty(w.shape)
+    off[0] = (b - 0.5 * v2) * s / sq
+    off[0, :, -1] += lnX / st                                # non-integral term is relative to K = 1
+    off[1] = off[0] + sq
+    lndisc = -b * tau[:, 0]
+
+    # initial guess: blend of the short-maturity limit X and the perpetual boundary
+    binf = 0.0
+    if r > 0.0:
+        a = b / v2 - 0.5
+        beta = -a - math.sqrt(a * a + 2.0 * r / v2)
+        binf = min(beta / (beta - 1.0), X)
+    lnB = np.log(binf + (X - binf) * np.exp(-st * X / max(X - binf, 1e-300)))
+
+    H = np.zeros(_NC + 1)
+    shape = s.shape
+    for _ in range(_ITERS):
+        d = lnB - lnX
+        H[1:] = d * d
+        # ln B(tau_i) - ln B(u) at the quadrature points
+        dl = np.sqrt(np.abs(_M @ H)).reshape(shape)
+        dl += d[:, None]
+        nd = (w * ndtr(dl * isq + off)).sum(axis=-1)
+        lnB = np.minimum(lndisc + np.log(np.maximum(nd[0] / nd[1], 1e-300)), lnX)
+    d = lnB - lnX
+    H[1:] = d * d
+    return H, lnX
+
+
+def _euro_put(S, K, T, r, q, sig):
+    st = sig * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q) * T) / st + 0.5 * st
+    return K * math.exp(-r * T) * ndtr(st - d1) - S * math.exp(-q * T) * ndtr(-d1)
+
+
+def _alo_put(S, T, r, q, sig):
+    # K = 1 put, single lower exercise boundary: European price + early-exercise premium
+    H, lnX = _boundary(T, r, q, sig)
+    lnS = math.log(S)
+    if lnS <= lnX - math.sqrt(H[-1]):
+        return 1.0 - S
+    t = T * _XF
+    sq = sig * np.sqrt(t)
+    dm = (lnS - lnX + np.sqrt(np.abs(_MF @ H)) + (r - q - 0.5 * sig * sig) * t) / sq
+    eep = T * float((_WF * (r * np.exp(-r * t) * ndtr(-dm) - q * S * np.exp(-q * t) * ndtr(-dm - sq))).sum())
+    return max(_euro_put(S, 1.0, T, r, q, sig) + eep, 1.0 - S)
+
+
+def _tree_put(S, T, r, q, sig, n):
+    # K = 1 put on a binomial tree equally spaced in log-price around the drift, BBS last step
+    dt = T / n
+    dx = sig * math.sqrt(dt)
+    nu = (r - q - 0.5 * sig * sig) * dt
+    p = (math.exp(0.5 * sig * sig * dt) - math.exp(-dx)) / (2.0 * math.sinh(dx))
+    disc = math.exp(-r * dt)
+    ker = np.array([disc * p, disc * (1.0 - p)])
+    i = np.arange(n)[:, None]
+    E = 1.0 - S * np.exp(i * nu + (2 * np.arange(n)[None, :] - i) * dx)   # exercise value, level i, node j
+    Sn = S * np.exp((n - 1) * nu + (2 * np.arange(n) - (n - 1)) * dx)
+    d1 = (np.log(Sn) + (r - q) * dt) / dx + 0.5 * dx
+    v = np.maximum(disc * ndtr(dx - d1) - Sn * math.exp(-q * dt) * ndtr(-d1), E[n - 1])
+    for k in range(n - 2, -1, -1):
+        v = np.convolve(v, ker, "valid")
+        np.maximum(v, E[k, :k + 1], out=v)
+    return float(v[0])
+
+
+def _put(S, K, T, r, q, sig):
+    x = S / K
+    if r > 0.0 or (r == 0.0 and q < 0.0):
+        return K * _alo_put(x, T, r, q, sig)
+    if q >= r:
+        return _euro_put(S, K, T, r, q, sig)
+    # q < r < 0: two exercise boundaries
+    p = 2.0 * _tree_put(x, T, r, q, sig, _TREE_N) - _tree_put(x, T, r, q, sig, _TREE_N // 2)
+    return K * max(p, _euro_put(x, 1.0, T, r, q, sig), 1.0 - x)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S, K, T, r, q, sigma = float(S), float(K), float(T), float(r), float(q), float(sigma)
+    if T <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    if is_call:
+        return float(_put(K, S, T, q, r, sigma))
+    return float(_put(S, K, T, r, q, sigma))

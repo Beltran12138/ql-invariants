@@ -1,0 +1,377 @@
+```python
+import math
+from scipy.special import ndtr
+
+
+def _european_call(S, K, T, r, q, sigma):
+    if T <= 0:
+        return max(S - K, 0.0)
+    sqrtT = math.sqrt(T)
+    denom = sigma * sqrtT
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / denom
+    d2 = d1 - denom
+    return S * math.exp(-q * T) * ndtr(d1) - K * math.exp(-r * T) * ndtr(d2)
+
+
+def _binomial_american(S, K, T, r, q, sigma, is_call):
+    n = 100
+    if T <= 0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+
+    dt = T / n
+    u = math.exp(sigma * math.sqrt(dt))
+    d = 1.0 / u
+    pu = (math.exp((r - q) * dt) - d) / (u - d)
+    if pu < 0.0:
+        pu = 0.0
+    elif pu > 1.0:
+        pu = 1.0
+    pd = 1.0 - pu
+    disc = math.exp(-r * dt)
+    u2 = u * u
+
+    s0 = S * d ** n
+    stock = [s0]
+    for _ in range(n):
+        s0 *= u2
+        stock.append(s0)
+
+    if is_call:
+        vals = [max(s - K, 0.0) for s in stock]
+    else:
+        vals = [max(K - s, 0.0) for s in stock]
+
+    s_low = S * d ** n
+    for i in range(n - 1, -1, -1):
+        s_low *= u
+        s = s_low
+        new_vals = [0.0] * (i + 1)
+        if is_call:
+            for j in range(i + 1):
+                hold = disc * (pu * vals[j + 1] + pd * vals[j])
+                ex = s - K
+                new_vals[j] = hold if hold > ex else ex
+                s *= u2
+        else:
+            for j in range(i + 1):
+                hold = disc * (pu * vals[j + 1] + pd * vals[j])
+                ex = K - s
+                new_vals[j] = hold if hold > ex else ex
+                s *= u2
+        vals = new_vals
+
+    return vals[0]
+
+
+def _bjerksund_call(S, K, T, r, q, sigma):
+    if T <= 0:
+        return max(S - K, 0.0)
+
+    b = r - q
+    sigma2 = sigma * sigma
+    sqrtT = math.sqrt(T)
+    denom = sigma * sqrtT
+
+    x = b / sigma2
+    y = r / sigma2
+    disc = (x - 0.5) ** 2 + 2.0 * y
+    if disc < 0:
+        return None
+
+    beta = 0.5 - x + math.sqrt(disc)
+    if beta <= 1.0:
+        return None
+
+    B_inf = beta / (beta - 1.0) * K
+    if r > 0:
+        B0 = max(K, r / (r - q) * K)
+    else:
+        B0 = K
+
+    diff = B_inf - B0
+    if diff <= 0:
+        return None
+
+    h1 = -(b * T + 2.0 * sigma * sqrtT) * B0 / diff
+    h2 = -(r * T + 2.0 * sigma * sqrtT) * B0 / diff
+
+    if h1 > 700 or h2 > 700:
+        return None
+
+    e1 = math.exp(h1)
+    e2 = math.exp(h2)
+    I = B0 + diff * (1.0 - e1)
+    X = B0 + diff * (1.0 - e2)
+
+    if I <= K or X <= K:
+        return None
+    if S >= I:
+        return S - K
+
+    log_u = math.log(S / I)
+
+    def safe_product(power, coeff):
+        if coeff == 0.0:
+            return 0.0
+        if not math.isfinite(coeff):
+            return None
+        log_abs = power * log_u + math.log(abs(coeff))
+        if log_abs > 700:
+            return None
+        val = math.exp(log_abs)
+        return val if coeff > 0.0 else -val
+
+    # beta term
+    A_beta = b + (beta - 0.5) * sigma2
+    d1b = (math.log(S / I) + A_beta * T) / denom
+    d2b = (math.log(I / S) + A_beta * T) / denom
+    N1b = ndtr(d1b)
+    N2b = ndtr(d2b)
+
+    lambda_beta = -r + beta * b + 0.5 * beta * (beta - 1.0) * sigma2
+    log_lb = lambda_beta * T
+    if log_lb > 700:
+        return None
+    e_lb = math.exp(log_lb)
+
+    p_beta = 1.0 - 2.0 * b / sigma2 - beta
+
+    coeff1 = (I - K) * (1.0 - e_lb * N1b)
+    coeff2 = (I - K) * e_lb * N2b
+    part1 = safe_product(beta, coeff1)
+    part2 = safe_product(p_beta, coeff2)
+    if part1 is None or part2 is None:
+        return None
+    term_beta = part1 + part2
+
+    # gamma = 1 term
+    A1 = b + 0.5 * sigma2
+    d1_1I = (math.log(S / I) + A1 * T) / denom
+    d2_1I = (math.log(I / S) + A1 * T) / denom
+    d1_1X = (math.log(S / X) + A1 * T) / denom
+    d2_1X = (math.log(I * I / (S * X)) + A1 * T) / denom
+
+    N1_I = ndtr(d1_1I)
+    N1_X = ndtr(d1_1X)
+    N2_I = ndtr(d2_1I)
+    N2_X = ndtr(d2_1X)
+
+    diff1_1 = N1_I - N1_X
+    diff2_1 = N2_I - N2_X
+
+    e_q = math.exp(-q * T)
+    p1 = -2.0 * b / sigma2
+
+    coeff1a = I * e_q * diff1_1
+    coeff1b = -I * e_q * diff2_1
+    part1a = safe_product(1.0, coeff1a)
+    part1b = safe_product(p1, coeff1b)
+    if part1a is None or part1b is None:
+        return None
+    term1 = part1a + part1b
+
+    # gamma = 0 term
+    A0 = b - 0.5 * sigma2
+    d1_0I = (math.log(S / I) + A0 * T) / denom
+    d2_0I = (math.log(I / S) + A0 * T) / denom
+    d1_0X = (math.log(S / X) + A0 * T) / denom
+    d2_0X = (math.log(I * I / (S * X)) + A0 * T) / denom
+
+    N01_I = ndtr(d1_0I)
+    N01_X = ndtr(d1_0X)
+    N02_I = ndtr(d2_0I)
+    N02_X = ndtr(d2_0X)
+
+    diff1_0 = N01_I - N01_X
+    diff2_0 = N02_I - N02_X
+
+    e_r = math.exp(-r * T)
+    p0 = 1.0 - 2.0 * b / sigma2
+
+    coeff0a = -K * e_r * diff1_0
+    coeff0b = K * e_r * diff2_0
+    part0a = safe_product(0.0, coeff0a)
+    part0b = safe_product(p0, coeff0b)
+    if part0a is None or part0b is None:
+        return None
+    term0 = part0a + part0b
+
+    return term_beta + term1 + term0
+
+
+def _baw_call(S, K, T, r, q, sigma):
+    if T <= 0:
+        return max(S - K, 0.0)
+
+    b = r - q
+    sigma2 = sigma * sigma
+    sqrtT = math.sqrt(T)
+    denom = sigma * sqrtT
+
+    N = 2.0 * b / sigma2
+    M = 2.0 * r / sigma2
+
+    if abs(r) < 1e-14:
+        q2 = (-(N - 1.0) + math.sqrt(max((N - 1.0) ** 2 + 8.0 / (sigma2 * T), 0.0))) / 2.0
+    else:
+        h = 1.0 - math.exp(-r * T)
+        q2 = (-(N - 1.0) + math.sqrt(max((N - 1.0) ** 2 + 4.0 * M / h, 0.0))) / 2.0
+
+    if q2 <= 0:
+        return _european_call(S, K, T, r, q, sigma)
+
+    x = b / sigma2
+    y = r / sigma2
+    disc = (x - 0.5) ** 2 + 2.0 * y
+    if disc < 0:
+        B_inf = max(K * 10.0, K)
+    else:
+        beta = 0.5 - x + math.sqrt(disc)
+        if beta <= 1.0:
+            B_inf = max(K * 10.0, K)
+        else:
+            B_inf = beta / (beta - 1.0) * K
+
+    if r > 0:
+        B0 = max(K, r / (r - q) * K)
+    else:
+        B0 = K
+
+    U = max(B_inf, B0, K * 1.1) * 2.0 + K
+
+    diff = B_inf - B0
+    if diff > 0:
+        h1 = -(b * T + 2.0 * sigma * sqrtT) * B0 / diff
+        if h1 < 700:
+            guess = B0 + diff * (1.0 - math.exp(h1))
+        else:
+            guess = B0 + diff
+    else:
+        guess = max(K, B0)
+
+    if guess <= K:
+        guess = K * 1.01
+
+    S_star = guess
+    tol = 1e-8 * max(1.0, K)
+    good = False
+
+    def F_func(Sx):
+        lsk = math.log(Sx / K)
+        d1 = (lsk + (b + 0.5 * sigma2) * T) / denom
+        c = Sx * math.exp(-q * T) * ndtr(d1) - K * math.exp(-r * T) * ndtr(d1 - denom)
+        Q = 1.0 - math.exp(-q * T) * ndtr(d1)
+        return Sx - K - c - (Sx / q2) * Q
+
+    for _ in range(50):
+        lsk = math.log(S_star / K)
+        d1 = (lsk + (b + 0.5 * sigma2) * T) / denom
+        N_d1 = ndtr(d1)
+        c = S_star * math.exp(-q * T) * N_d1 - K * math.exp(-r * T) * ndtr(d1 - denom)
+        Q = 1.0 - math.exp(-q * T) * N_d1
+        F = S_star - K - c - (S_star / q2) * Q
+
+        if abs(F) < tol:
+            good = True
+            break
+
+        pdf = math.exp(-0.5 * d1 * d1) / math.sqrt(2.0 * math.pi)
+        cp = math.exp(-q * T) * N_d1
+        Fp = 1.0 - cp - Q / q2 + math.exp(-q * T) * pdf / (q2 * denom)
+
+        if not math.isfinite(Fp) or Fp <= 0:
+            break
+
+        S_new = S_star - F / Fp
+        if S_new <= K:
+            S_new = 0.5 * (S_star + K)
+        if S_new > U:
+            S_new = 0.5 * (S_star + U)
+        if abs(S_new - S_star) < tol:
+            S_star = S_new
+            good = True
+            break
+        S_star = S_new
+
+    if not good:
+        lo = K
+        hi = U
+        Flo = F_func(lo)
+        Fhi = F_func(hi)
+
+        if Flo * Fhi > 0:
+            return _european_call(S, K, T, r, q, sigma)
+
+        for _ in range(100):
+            mid = 0.5 * (lo + hi)
+            Fmid = F_func(mid)
+            if abs(Fmid) < tol:
+                S_star = mid
+                good = True
+                break
+            if Flo * Fmid <= 0:
+                hi = mid
+            else:
+                lo = mid
+                Flo = Fmid
+        if not good:
+            S_star = 0.5 * (lo + hi)
+
+    if S >= S_star:
+        return S - K
+
+    c = _european_call(S, K, T, r, q, sigma)
+    d1_star = (math.log(S_star / K) + (b + 0.5 * sigma2) * T) / denom
+    A = (S_star / q2) * (1.0 - math.exp(-q * T) * ndtr(d1_star))
+    if A < 0:
+        A = 0.0
+
+    ratio = S / S_star
+    log_prem = q2 * math.log(ratio)
+    if log_prem < -745:
+        premium = 0.0
+    else:
+        premium = A * math.exp(log_prem)
+
+    return c + premium
+
+
+def _american_call(S, K, T, r, q, sigma):
+    if T <= 0:
+        return max(S - K, 0.0)
+
+    euro = _european_call(S, K, T, r, q, sigma)
+
+    if r >= 0 and q <= 0:
+        return euro
+
+    intrinsic = max(S - K, 0.0)
+
+    if q > 0:
+        price = _bjerksund_call(S, K, T, r, q, sigma)
+
+        if (price is None or not math.isfinite(price) or
+                price < euro - 1e-8 * K or
+                price > S + 1e-8 * K or
+                price < intrinsic - 1e-8 * K):
+            price = _baw_call(S, K, T, r, q, sigma)
+
+        if (not math.isfinite(price) or
+                price < intrinsic - 1e-8 * K or
+                price > S + 1e-8 * K):
+            price = _binomial_american(S, K, T, r, q, sigma, True)
+
+        return max(intrinsic, min(price, S))
+
+    # q <= 0 and r < 0
+    return _binomial_american(S, K, T, r, q, sigma, True)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    """Price an American option under Black-Scholes with continuous dividend yield q."""
+    if is_call:
+        return _american_call(S, K, T, r, q, sigma)
+    else:
+        # Put-call symmetry: American put(S,K,r,q) = American call(K,S,q,r)
+        return _american_call(K, S, T, q, r, sigma)
+```

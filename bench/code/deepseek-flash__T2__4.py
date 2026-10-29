@@ -1,0 +1,81 @@
+import numpy as np
+from math import log, sqrt, exp
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+
+    if sigma <= 0:
+        n_grid = 10000
+        t = np.linspace(0.0, T, n_grid)
+        if is_call:
+            vals = np.maximum(S * np.exp(-q * t) - K * np.exp(-r * t), 0.0)
+        else:
+            vals = np.maximum(K * np.exp(-r * t) - S * np.exp(-q * t), 0.0)
+        return float(np.max(vals))
+
+    def crr(N):
+        dt = T / N
+        u = np.exp(sigma * np.sqrt(dt))
+        d = 1.0 / u
+        p = (np.exp((r - q) * dt) - d) / (u - d)
+        disc = np.exp(-r * dt)
+        j = np.arange(N + 1)
+        S_T = S * u**j * d**(N - j)
+        V = np.maximum(S_T - K, 0.0) if is_call else np.maximum(K - S_T, 0.0)
+        for i in range(N - 1, -1, -1):
+            cont = disc * ((1.0 - p) * V[:-1] + p * V[1:])
+            j = np.arange(i + 1)
+            S_i = S * u**j * d**(i - j)
+            exercise = np.maximum(S_i - K, 0.0) if is_call else np.maximum(K - S_i, 0.0)
+            V = np.maximum(cont, exercise)
+        return float(V[0])
+
+    n = 2001
+    dt = T / n
+    E = exp((r - q) * dt)
+    sqrtT = sqrt(T)
+    d1 = (log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * sqrtT)
+    d2 = d1 - sigma * sqrtT
+
+    def pp_inv(z, n):
+        if z == 0.0:
+            return 0.5
+        a = n + 1.0 / 3.0 + 0.1 / (n + 1)
+        b = n + 1.0 / 6.0
+        arg = 1.0 - exp(-((z / a) ** 2) * b)
+        if arg < 0.0:
+            arg = 0.0
+        return 0.5 + 0.5 * (1.0 if z > 0 else -1.0) * sqrt(arg)
+
+    p = pp_inv(d2, n)
+    p_prime = pp_inv(d1, n)
+
+    if (not np.isfinite(p) or not np.isfinite(p_prime) or
+            p <= 0.0 or p >= 1.0):
+        return crr(2000)
+
+    u = E * p_prime / p
+    d = (E - p * u) / (1.0 - p)
+
+    if (not np.isfinite(u) or not np.isfinite(d) or
+            u <= 0.0 or d <= 0.0):
+        return crr(2000)
+
+    disc = exp(-r * dt)
+    log_S = log(S)
+    log_u = log(u)
+    log_d = log(d)
+
+    j = np.arange(n + 1)
+    S_T = np.exp(log_S + (n - j) * log_d + j * log_u)
+    V = np.maximum(S_T - K, 0.0) if is_call else np.maximum(K - S_T, 0.0)
+
+    for i in range(n - 1, -1, -1):
+        cont = disc * ((1.0 - p) * V[:-1] + p * V[1:])
+        j = np.arange(i + 1)
+        S_i = np.exp(log_S + (i - j) * log_d + j * log_u)
+        exercise = np.maximum(S_i - K, 0.0) if is_call else np.maximum(K - S_i, 0.0)
+        V = np.maximum(cont, exercise)
+
+    return float(V[0])

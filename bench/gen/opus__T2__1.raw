@@ -1,0 +1,167 @@
+```python
+import math
+
+import numpy as np
+from scipy.stats import norm
+
+
+def _european(S, K, T, r, q, sigma, is_call):
+    df_r = math.exp(-r * T)
+    df_q = math.exp(-q * T)
+    if T <= 0.0 or sigma <= 0.0:
+        fwd = S * df_q - K * df_r
+        return max(fwd, 0.0) if is_call else max(-fwd, 0.0)
+    sqT = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sqT
+    d2 = d1 - sqT
+    if is_call:
+        return S * df_q * norm.cdf(d1) - K * df_r * norm.cdf(d2)
+    return K * df_r * norm.cdf(-d2) - S * df_q * norm.cdf(-d1)
+
+
+def _put_zero_vol(S, K, T, r, q):
+    # Deterministic path: maximise K e^{-rt} - S e^{-qt} over t in [0, T].
+    f = lambda t: K * math.exp(-r * t) - S * math.exp(-q * t)
+    cands = [0.0, T]
+    if r != q and r * K > 0 and q * S > 0:
+        ts = math.log((r * K) / (q * S)) / (r - q)
+        if 0.0 < ts < T:
+            cands.append(ts)
+    return max(0.0, max(f(t) for t in cands))
+
+
+def _american_put(S, K, T, r, q, sigma, N=500, M=500):
+    intrinsic = max(K - S, 0.0)
+    if T <= 0.0:
+        return intrinsic
+    if S <= 0.0:
+        return K if r >= 0 else K * math.exp(-r * T) if q >= r else K
+    if sigma <= 0.0 or sigma * math.sqrt(T) < 1e-10:
+        return _put_zero_vol(S, K, T, r, q)
+    # No early exercise premium when r <= 0 and q >= r.
+    if r <= 0.0 and q >= r:
+        return max(_european(S, K, T, r, q, sigma, False), intrinsic)
+
+    # Brennan-Schwartz is valid for the single-boundary case (r > 0).
+    brennan_schwartz = r > 0.0
+
+    s2 = sigma * sigma
+    nu = r - q - 0.5 * s2
+    lnS, lnK = math.log(S), math.log(K)
+    w = 6.0 * sigma * math.sqrt(T) + abs(nu) * T
+    xlo = min(lnS, lnK) - w
+    xhi = max(lnS, lnK) + w
+    dx = (xhi - xlo) / N
+    i0 = int(round((lnS - xlo) / dx))
+    i0 = min(max(i0, 1), N - 1)
+    xlo = lnS - i0 * dx
+    x = xlo + dx * np.arange(N + 1)
+    Sg = np.exp(x)
+    g = np.maximum(K - Sg, 0.0)
+
+    a = s2 / (2 * dx * dx) - nu / (2 * dx)
+    c = s2 / (2 * dx * dx) + nu / (2 * dx)
+    if a < 0.0 or c < 0.0:  # upwind the drift if convection dominated
+        if nu > 0:
+            a = s2 / (2 * dx * dx)
+            c = s2 / (2 * dx * dx) + nu / dx
+        else:
+            a = s2 / (2 * dx * dx) - nu / dx
+            c = s2 / (2 * dx * dx)
+    b = -(a + c) - r
+
+    n_int = N - 1
+    g_int = g[1:N].tolist()
+    S0 = Sg[0]
+
+    cache = {}
+
+    def factor(dt, theta):
+        key = (dt, theta)
+        if key in cache:
+            return cache[key]
+        A = -theta * dt * a
+        B = 1.0 - theta * dt * b
+        C = -theta * dt * c
+        d = [0.0] * n_int
+        m = [0.0] * n_int
+        d[n_int - 1] = B
+        for i in range(n_int - 2, -1, -1):
+            m[i] = C / d[i + 1]
+            d[i] = B - m[i] * A
+        cache[key] = (A, C, d, m)
+        return cache[key]
+
+    V = g.copy()
+    tau = 0.0
+
+    def step(V, dt, theta, tau_new):
+        A, C, d, m = factor(dt, theta)
+        lv = V[:-2]
+        cv = V[1:-1]
+        rv = V[2:]
+        rhs = cv + (1.0 - theta) * dt * (a * lv + b * cv + c * rv)
+        v0 = max(K - S0, K * math.exp(-r * tau_new) - S0 * math.exp(-q * tau_new))
+        vN = 0.0
+        rhs[0] -= A * v0
+        rhs[-1] -= C * vN
+        rp = rhs.tolist()
+        for i in range(n_int - 2, -1, -1):
+            rp[i] -= m[i] * rp[i + 1]
+        out = [0.0] * n_int
+        prev = 0.0
+        if brennan_schwartz:
+            for i in range(n_int):
+                val = (rp[i] - (A * prev if i > 0 else 0.0)) / d[i]
+                gi = g_int[i]
+                if val < gi:
+                    val = gi
+                out[i] = val
+                prev = val
+        else:
+            for i in range(n_int):
+                val = (rp[i] - (A * prev if i > 0 else 0.0)) / d[i]
+                out[i] = val
+                prev = val
+            out = [max(o, gi) for o, gi in zip(out, g_int)]
+        Vn = np.empty(N + 1)
+        Vn[0] = max(v0, g[0])
+        Vn[1:N] = out
+        Vn[N] = vN
+        return Vn
+
+    dt = T / M
+    # Rannacher start-up: 4 fully implicit half steps, then Crank-Nicolson.
+    for _ in range(4):
+        tau += 0.5 * dt
+        V = step(V, 0.5 * dt, 1.0, tau)
+    for _ in range(M - 2):
+        tau += dt
+        V = step(V, dt, 0.5, tau)
+
+    return max(float(V[i0]), intrinsic)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S = float(S)
+    K = float(K)
+    T = float(T)
+    r = float(r)
+    q = float(q)
+    sigma = float(sigma)
+
+    if T <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+
+    if is_call:
+        if K <= 0.0:
+            return S
+        if S <= 0.0:
+            return 0.0
+        # McDonald-Schroder put-call symmetry: C(S, K, r, q) = P(K, S, q, r)
+        return _american_put(K, S, T, q, r, sigma)
+    else:
+        if K <= 0.0:
+            return 0.0
+        return _american_put(S, K, T, r, q, sigma)
+```

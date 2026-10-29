@@ -1,0 +1,108 @@
+import math
+import numpy as np
+from scipy.linalg import solve_banded
+from scipy.stats import norm
+
+
+def _european_price(S, K, T, r, q, sigma, is_call):
+    sd = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sd
+    d2 = d1 - sd
+    dq, dr = math.exp(-q * T), math.exp(-r * T)
+    if is_call:
+        return S * dq * norm.cdf(d1) - K * dr * norm.cdf(d2)
+    return K * dr * norm.cdf(-d2) - S * dq * norm.cdf(-d1)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S, K, T, r, q, sigma = map(float, (S, K, T, r, q, sigma))
+    phi = 1.0 if is_call else -1.0
+    intrinsic = max(phi * (S - K), 0.0)
+
+    if T <= 0.0 or S <= 0.0:
+        return intrinsic
+    if K <= 0.0:
+        return S if is_call else 0.0
+
+    # Zero volatility: deterministic path, maximise the discounted payoff over exercise time
+    if sigma <= 1e-12:
+        t = np.linspace(0.0, T, 20001)
+        vals = phi * (S * np.exp(-q * t) - K * np.exp(-r * t))
+        return float(max(0.0, vals.max()))
+
+    euro = _european_price(S, K, T, r, q, sigma, is_call)
+
+    # Early exercise is never optimal in these cases
+    if is_call and q <= 0.0 and r >= 0.0:
+        return float(max(euro, 0.0))
+    if (not is_call) and r <= 0.0 and q >= 0.0:
+        return float(max(euro, 0.0))
+
+    # Crank-Nicolson in x = ln S, with Rannacher start-up steps and early-exercise projection
+    sd = sigma * math.sqrt(T)
+    L = max(6.0 * sd, abs(math.log(K / S)) + 5.0 * sd)
+    m = 800
+    M = 2 * m + 1
+    dx = L / m
+    x = math.log(S) + dx * (np.arange(M) - m)
+    Sg = np.exp(x)
+    payoff = np.maximum(phi * (Sg - K), 0.0)
+
+    nu = r - q - 0.5 * sigma * sigma
+    alpha = 0.5 * sigma * sigma / (dx * dx)
+    beta = nu / (2.0 * dx)
+    lower, upper = alpha - beta, alpha + beta
+    if lower < 0.0 or upper < 0.0:
+        # Upwind the drift when it dominates diffusion
+        if nu > 0.0:
+            lower, upper = alpha, alpha + nu / dx
+        else:
+            lower, upper = alpha - nu / dx, alpha
+    diag = -(lower + upper) - r
+
+    def bound(Sb, tau):
+        return max(phi * (Sb - K),
+                   phi * (Sb * math.exp(-q * tau) - K * math.exp(-r * tau)),
+                   0.0)
+
+    n = M - 2
+
+    def make_ab(theta, h):
+        ab = np.zeros((3, n))
+        ab[0, 1:] = -theta * h * upper
+        ab[1, :] = 1.0 - theta * h * diag
+        ab[2, :-1] = -theta * h * lower
+        return ab
+
+    def step(V, tau_old, h, theta, ab):
+        Vi = V[1:-1]
+        AV = lower * V[:-2] + diag * Vi + upper * V[2:]
+        rhs = Vi + (1.0 - theta) * h * AV
+        tau_new = tau_old + h
+        b0 = bound(Sg[0], tau_new)
+        b1 = bound(Sg[-1], tau_new)
+        rhs[0] += theta * h * lower * b0
+        rhs[-1] += theta * h * upper * b1
+        sol = solve_banded((1, 1), ab, rhs, check_finite=False)
+        Vn = np.empty_like(V)
+        Vn[1:-1] = sol
+        Vn[0] = b0
+        Vn[-1] = b1
+        return np.maximum(Vn, payoff), tau_new
+
+    N = 1000
+    dt = T / N
+    V = payoff.copy()
+    tau = 0.0
+
+    # Rannacher smoothing: 4 implicit half-steps
+    ab_imp = make_ab(1.0, 0.5 * dt)
+    for _ in range(4):
+        V, tau = step(V, tau, 0.5 * dt, 1.0, ab_imp)
+
+    ab_cn = make_ab(0.5, dt)
+    for _ in range(N - 2):
+        V, tau = step(V, tau, dt, 0.5, ab_cn)
+
+    price = float(V[m])
+    return float(max(price, euro, intrinsic))

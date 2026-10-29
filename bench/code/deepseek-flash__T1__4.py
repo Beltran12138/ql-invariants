@@ -1,0 +1,159 @@
+import math
+
+_SQRT2_INV = 0.7071067811865476
+
+def _norm_cdf(x):
+    return 0.5 * math.erfc(-x * _SQRT2_INV)
+
+def _bs_call(S, K, T, r, q, sigma):
+    if T <= 0.0:
+        return max(S - K, 0.0)
+    if S <= 0.0:
+        return 0.0
+    v = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / v
+    d2 = d1 - v
+    return S * math.exp(-q * T) * _norm_cdf(d1) - K * math.exp(-r * T) * _norm_cdf(d2)
+
+def _bs2002_call(S, K, T, r, q, sigma):
+    if T <= 0.0:
+        return max(S - K, 0.0)
+    if S <= 0.0:
+        return 0.0
+
+    b = r - q
+    sigma2 = sigma * sigma
+    beta = (0.5 - b / sigma2) + math.sqrt((b / sigma2 - 0.5) ** 2 + 2.0 * r / sigma2)
+    BInf = beta / (beta - 1.0) * K
+
+    if r == 0.0:
+        B0 = K
+    else:
+        B0 = max(K, r / (r - b) * K)
+
+    t = 0.5 * T
+    sqrt_t = math.sqrt(t)
+    sqrt_T = math.sqrt(T)
+    denom = BInf - B0
+    ht1 = -(b * t + 2.0 * sigma * sqrt_t) * B0 / denom
+    ht2 = -(b * T + 2.0 * sigma * sqrt_T) * B0 / denom
+
+    intr = S - K
+    if intr < 0.0:
+        intr = 0.0
+
+    if ht2 > 50.0:
+        return intr
+
+    I1 = B0 + denom * (1.0 - math.exp(ht1))
+    I2 = B0 + denom * (1.0 - math.exp(ht2))
+
+    if S >= I2:
+        return intr
+
+    alpha1 = (I1 - K) * I1 ** (-beta)
+    alpha2 = (I2 - K) * I2 ** (-beta)
+
+    def phi(S_, T_, gamma, H, I):
+        lam = (-r + gamma * b + 0.5 * gamma * (gamma - 1.0) * sigma2) * T_
+        d = -(math.log(S_ / H) + (b + (gamma - 0.5) * sigma2) * T_) / (sigma * math.sqrt(T_))
+        kappa = 2.0 * b / sigma2 + 2.0 * gamma - 1.0
+        return (
+            math.exp(lam)
+            * (S_ ** gamma)
+            * (
+                _norm_cdf(d)
+                - (I / S_) ** kappa
+                * _norm_cdf(d - 2.0 * math.log(I / S_) / (sigma * math.sqrt(T_)))
+            )
+        )
+
+    price = (
+        alpha2 * (S ** beta)
+        - alpha2 * phi(S, t, beta, I1, I2)
+        + phi(S, t, 1.0, I1, I2)
+        - phi(S, t, 1.0, K, I2)
+        - K * phi(S, t, 0.0, I1, I2)
+        + K * phi(S, t, 0.0, K, I2)
+        + phi(S, T, 1.0, I2, I2)
+        - phi(S, T, 1.0, K, I2)
+        - K * phi(S, T, 0.0, I2, I2)
+        + K * phi(S, T, 0.0, K, I2)
+    )
+
+    if price < intr:
+        price = intr
+    if price < 0.0:
+        price = 0.0
+    return price
+
+def _binomial_call(S, K, T, r, q, sigma, N=61):
+    if T <= 0.0:
+        return max(S - K, 0.0)
+    if S <= 0.0:
+        return 0.0
+
+    dt = T / N
+    b = r - q
+    e_b = math.exp(b * dt)
+    e_sigma = math.exp(sigma * sigma * dt)
+    sqrt_term = math.sqrt(max(e_sigma - 1.0, 0.0))
+    u = e_b * (1.0 + sqrt_term)
+    d = e_b * (1.0 - sqrt_term)
+
+    if d <= 0.0:
+        u = math.exp((b - 0.5 * sigma * sigma) * dt + sigma * math.sqrt(dt))
+        d = math.exp((b - 0.5 * sigma * sigma) * dt - sigma * math.sqrt(dt))
+
+    p = 0.5
+    disc = math.exp(-r * dt)
+    ratio = u / d
+
+    n = N - 1
+    base = S * (d ** n)
+    vals = [0.0] * N
+    stock = base
+    for j in range(N):
+        intr = stock - K
+        if intr < 0.0:
+            intr = 0.0
+        cont = _bs_call(stock, K, dt, r, q, sigma)
+        vals[j] = intr if intr > cont else cont
+        stock *= ratio
+
+    for i in range(N - 2, -1, -1):
+        base = S * (d ** i)
+        stock = base
+        for j in range(i + 1):
+            cont = disc * (p * vals[j + 1] + (1.0 - p) * vals[j])
+            intr = stock - K
+            if intr < 0.0:
+                intr = 0.0
+            vals[j] = intr if intr > cont else cont
+            stock *= ratio
+
+    return vals[0]
+
+def _american_call(S, K, T, r, q, sigma):
+    if T <= 0.0:
+        return max(S - K, 0.0)
+    if S <= 0.0:
+        return 0.0
+
+    if q <= 0.0:
+        if r >= 0.0:
+            price = _bs_call(S, K, T, r, q, sigma)
+            intr = S - K
+            if intr < 0.0:
+                intr = 0.0
+            return price if price > intr else intr
+        else:
+            return _binomial_call(S, K, T, r, q, sigma)
+    else:
+        return _bs2002_call(S, K, T, r, q, sigma)
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if is_call:
+        return _american_call(S, K, T, r, q, sigma)
+    else:
+        return _american_call(K, S, T, q, r, sigma)

@@ -1,0 +1,208 @@
+```python
+import numpy as np
+from scipy.stats import norm
+
+
+def _european(S, K, T, r, q, sigma, is_call):
+    if T <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+    if is_call:
+        return S * np.exp(-q * T) * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    else:
+        return K * np.exp(-r * T) * norm.cdf(-d2) - S * np.exp(-q * T) * norm.cdf(-d1)
+
+
+def _phi(S, T, gamma, H, I, r, q, sigma):
+    if T <= 0.0:
+        return 0.0
+    b = r - q
+    sqrtT = sigma * np.sqrt(T)
+    H = max(H, 1e-12)
+    I = max(I, 1e-12)
+    d1 = -(np.log(S / H) + (b + (gamma - 0.5) * sigma ** 2) * T) / sqrtT
+    d2 = -(np.log(I * I / (S * H)) + (b + (gamma - 0.5) * sigma ** 2) * T) / sqrtT
+    lambd = -r + gamma * b + 0.5 * gamma * (gamma - 1.0) * sigma ** 2
+    kappa = 2.0 * b / sigma ** 2 + 2.0 * gamma - 1.0
+    log_base = gamma * np.log(S) + lambd * T
+    log_base = np.clip(log_base, -700.0, 700.0)
+    term1 = np.exp(log_base) * norm.cdf(d1)
+    log_term2 = log_base + kappa * np.log(I / S)
+    log_term2 = np.clip(log_term2, -700.0, 700.0)
+    term2 = np.exp(log_term2) * norm.cdf(d2)
+    return term1 - term2
+
+
+def _discriminant(r, q, sigma):
+    b = r - q
+    return (b / sigma ** 2 - 0.5) ** 2 + 2.0 * r / sigma ** 2
+
+
+def _bjerksund_call(S, K, T, r, q, sigma):
+    b = r - q
+    D = _discriminant(r, q, sigma)
+    if D < 0.0:
+        return _binomial_american(S, K, T, r, q, sigma, True)
+
+    beta = 0.5 - b / sigma ** 2 + np.sqrt(D)
+    if q > 0.0:
+        B0 = max(K, r / q * K)
+    else:
+        B0 = max(K, r / q * K if q != 0.0 else K)
+
+    if abs(beta - 1.0) < 1e-12:
+        I = B0 * (1.0 + b * T + 2.0 * sigma * np.sqrt(T))
+        X = B0 * (1.0 + b * T - 2.0 * sigma * np.sqrt(T))
+        alpha = (I - K) / I
+    else:
+        Binf = beta / (beta - 1.0) * K
+        denom = Binf - B0
+        if abs(denom) < 1e-12:
+            return _binomial_american(S, K, T, r, q, sigma, True)
+        h1 = -(b * T + 2.0 * sigma * np.sqrt(T)) * B0 / denom
+        h1 = np.clip(h1, -700.0, 700.0)
+        I = B0 + denom * (1.0 - np.exp(h1))
+        h2 = -(b * T - 2.0 * sigma * np.sqrt(T)) * B0 / denom
+        h2 = np.clip(h2, -700.0, 700.0)
+        X = B0 + denom * (1.0 - np.exp(h2))
+        if I <= 0.0:
+            return _binomial_american(S, K, T, r, q, sigma, True)
+        if I >= K:
+            alpha = (I - K) * I ** (-beta)
+        else:
+            alpha = - (K - I) * I ** (-beta)
+
+    C = (alpha * S ** beta
+         - alpha * _phi(S, T, beta, I, I, r, q, sigma)
+         + _phi(S, T, 1.0, I, I, r, q, sigma)
+         - _phi(S, T, 1.0, X, I, r, q, sigma)
+         - K * _phi(S, T, 0.0, I, I, r, q, sigma)
+         + K * _phi(S, T, 0.0, X, I, r, q, sigma))
+    if not np.isfinite(C):
+        return _binomial_american(S, K, T, r, q, sigma, True)
+    return max(C, S - K)
+
+
+def _bjerksund_put(S, K, T, r, q, sigma):
+    b = r - q
+    D = _discriminant(r, q, sigma)
+    if D < 0.0:
+        return _binomial_american(S, K, T, r, q, sigma, False)
+
+    beta = 0.5 - b / sigma ** 2 - np.sqrt(D)
+
+    if r >= 0.0:
+        if q <= 0.0:
+            B0 = K
+        else:
+            B0 = min(K, r / q * K) if r > 0.0 else K
+    else:
+        B0 = min(K, r / q * K) if q != 0.0 else K
+
+    if q == 0.0 or B0 <= 0.0:
+        B0 = K
+
+    Binf = beta / (beta - 1.0) * K if abs(beta - 1.0) > 1e-12 else 0.0
+    denom = Binf - B0
+    if abs(denom) < 1e-12:
+        return _binomial_american(S, K, T, r, q, sigma, False)
+
+    h1 = -(b * T + 2.0 * sigma * np.sqrt(T)) * B0 / denom
+    h1 = np.clip(h1, -700.0, 700.0)
+    I = B0 + denom * (1.0 - np.exp(h1))
+    h2 = -(b * T - 2.0 * sigma * np.sqrt(T)) * B0 / denom
+    h2 = np.clip(h2, -700.0, 700.0)
+    X = B0 + denom * (1.0 - np.exp(h2))
+
+    if I <= 0.0:
+        return _binomial_american(S, K, T, r, q, sigma, False)
+
+    if K >= I:
+        alpha = (K - I) * I ** (-beta)
+    else:
+        alpha = - (I - K) * I ** (-beta)
+
+    P = (-alpha * S ** beta
+         + alpha * _phi(S, T, beta, I, I, r, q, sigma)
+         - _phi(S, T, 1.0, I, I, r, q, sigma)
+         + _phi(S, T, 1.0, X, I, r, q, sigma)
+         + K * _phi(S, T, 0.0, I, I, r, q, sigma)
+         - K * _phi(S, T, 0.0, X, I, r, q, sigma))
+    if not np.isfinite(P):
+        return _binomial_american(S, K, T, r, q, sigma, False)
+    return max(P, K - S)
+
+
+def _binomial_american(S, K, T, r, q, sigma, is_call):
+    n = 100
+    dt = T / n
+    u = np.exp(sigma * np.sqrt(dt))
+    d = 1.0 / u
+    p = (np.exp((r - q) * dt) - d) / (u - d)
+    disc = np.exp(-r * dt)
+
+    pu = [1.0] * (n + 1)
+    pd = [1.0] * (n + 1)
+    for i in range(1, n + 1):
+        pu[i] = pu[i - 1] * u
+        pd[i] = pd[i - 1] * d
+
+    V = []
+    for j in range(n + 1):
+        s = S * pu[n - j] * pd[j]
+        V.append(max(s - K, 0.0) if is_call else max(K - s, 0.0))
+
+    for i in range(n - 1, -1, -1):
+        for j in range(i + 1):
+            s = S * pu[i - j] * pd[j]
+            cont = disc * (p * V[j + 1] + (1.0 - p) * V[j])
+            intrinsic = max(s - K, 0.0) if is_call else max(K - s, 0.0)
+            V[j] = cont if cont > intrinsic else intrinsic
+    return V[0]
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S = float(S)
+    K = float(K)
+    T = float(T)
+    r = float(r)
+    q = float(q)
+    sigma = float(sigma)
+
+    if T <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+
+    if is_call:
+        if r >= 0.0 and q <= 0.0:
+            return _european(S, K, T, r, q, sigma, True)
+        if r < 0.0 and q < 0.0 and r / q <= 1.0:
+            return _european(S, K, T, r, q, sigma, True)
+
+        if r >= 0.0:
+            return _bjerksund_call(S, K, T, r, q, sigma)
+        else:
+            if q >= 0.0:
+                return _bjerksund_put(K, S, T, q, r, sigma)
+            else:
+                if _discriminant(r, q, sigma) >= 0.0:
+                    return _bjerksund_call(S, K, T, r, q, sigma)
+                else:
+                    return _binomial_american(S, K, T, r, q, sigma, True)
+    else:
+        if r <= 0.0 and q >= 0.0:
+            return _european(S, K, T, r, q, sigma, False)
+        if r < 0.0 and q < 0.0 and r / q >= 1.0:
+            return _european(S, K, T, r, q, sigma, False)
+
+        if r >= 0.0:
+            return _bjerksund_put(S, K, T, r, q, sigma)
+        else:
+            if q >= 0.0:
+                return _european(S, K, T, r, q, sigma, False)
+            else:
+                if _discriminant(r, q, sigma) >= 0.0:
+                    return _bjerksund_put(S, K, T, r, q, sigma)
+                else:
+                    return _binomial_american(S, K, T, r, q, sigma, False)
+```

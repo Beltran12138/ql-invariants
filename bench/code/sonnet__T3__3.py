@@ -1,0 +1,87 @@
+import math
+import numpy as np
+from scipy.special import ndtr, log_ndtr
+
+
+def _vanilla(S, K, T, r, q, sigma, is_call):
+    sT = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / sT
+    d2 = d1 - sT
+    phi = 1.0 if is_call else -1.0
+    v = phi * (S * math.exp(-q * T) * ndtr(phi * d1) - K * math.exp(-r * T) * ndtr(phi * d2))
+    return max(v, 0.0)
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    bt = barrier_type.lower().strip()
+    down = bt.startswith("down")
+    is_in = bt.endswith("in")
+
+    vanilla = _vanilla(S, K, T, r, q, sigma, is_call)
+
+    # 起始即已触碰障碍
+    breached = (S <= H) if down else (S >= H)
+    if breached:
+        return float(vanilla) if is_in else 0.0
+
+    phi = 1.0 if is_call else -1.0
+    eta = 1.0 if down else -1.0
+
+    b = r - q
+    sT = sigma * math.sqrt(T)
+    mu = (b - 0.5 * sigma ** 2) / sigma ** 2
+    lh = math.log(H / S)
+    logS = math.log(S)
+    logK = math.log(K)
+    disc_q = -q * T
+    disc_r = -r * T
+
+    x1 = math.log(S / K) / sT + (1.0 + mu) * sT
+    x2 = math.log(S / H) / sT + (1.0 + mu) * sT
+    y1 = math.log(H * H / (S * K)) / sT + (1.0 + mu) * sT
+    y2 = lh / sT + (1.0 + mu) * sT
+
+    def AB(x):
+        return phi * (S * math.exp(disc_q) * ndtr(phi * x)
+                      - K * math.exp(disc_r) * ndtr(phi * x - phi * sT))
+
+    # C, D 在对数空间计算，避免 (H/S)^(2mu) 溢出/下溢
+    def CD(y):
+        t1 = math.exp(logS + disc_q + 2.0 * (mu + 1.0) * lh + float(log_ndtr(eta * y)))
+        t2 = math.exp(logK + disc_r + 2.0 * mu * lh + float(log_ndtr(eta * y - eta * sT)))
+        return phi * (t1 - t2)
+
+    A = AB(x1)
+    B = AB(x2)
+    C = CD(y1)
+    D = CD(y2)
+
+    if is_call:
+        if down:
+            if K > H:
+                p_in, p_out = C, A - C
+            else:
+                p_in, p_out = A - B + D, B - D
+        else:
+            if K >= H:
+                p_in, p_out = A, 0.0
+            else:
+                p_in, p_out = B - C + D, A - B + C - D
+    else:
+        if down:
+            if K > H:
+                p_in, p_out = B - C + D, A - B + C - D
+            else:
+                p_in, p_out = A, 0.0
+        else:
+            if K < H:
+                p_in, p_out = C, A - C
+            else:
+                p_in, p_out = A - B + D, B - D
+
+    price = p_in if is_in else p_out
+    price = float(price)
+    if not np.isfinite(price):
+        price = 0.0
+    # 价格上下界：0 <= 障碍期权 <= 普通欧式期权
+    return min(max(price, 0.0), float(vanilla))

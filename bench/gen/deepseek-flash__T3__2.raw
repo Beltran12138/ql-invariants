@@ -1,0 +1,178 @@
+```python
+import math
+from scipy.stats import norm
+from scipy.integrate import quad
+
+
+def _bs_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+
+    sqrtT = math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * sqrtT)
+    d2 = d1 - sigma * sqrtT
+
+    dfq = math.exp(-q * T)
+    dfr = math.exp(-r * T)
+
+    if is_call:
+        price = S * dfq * norm.cdf(d1) - K * dfr * norm.cdf(d2)
+    else:
+        price = K * dfr * norm.cdf(-d2) - S * dfq * norm.cdf(-d1)
+
+    return max(price, 0.0)
+
+
+def _integrate_segments(func, a, b, centers, sd, scale):
+    if b <= a:
+        return 0.0
+
+    pts = [a, b]
+    pad = 15.0 * sd
+
+    for c in centers:
+        if c is None or not math.isfinite(c):
+            continue
+        for p in (c - pad, c, c + pad):
+            if a < p < b:
+                pts.append(p)
+
+    pts.sort()
+
+    unique = []
+    for p in pts:
+        if not unique:
+            unique.append(p)
+        else:
+            last = unique[-1]
+            if abs(p - last) > 1e-14 * max(1.0, abs(p), abs(last)):
+                unique.append(p)
+
+    epsabs = 1e-12 * scale
+    total = 0.0
+
+    for lo, hi in zip(unique, unique[1:]):
+        if hi <= lo:
+            continue
+        if hi - lo <= 1e-15 * max(1.0, abs(lo), abs(hi)):
+            continue
+
+        val, _ = quad(
+            func,
+            lo,
+            hi,
+            epsabs=epsabs,
+            epsrel=1e-10,
+            limit=200
+        )
+        total += val
+
+    return total
+
+
+def _barrier_knockout_price(S, K, H, T, r, q, sigma, is_call, is_down):
+    nu = r - q - 0.5 * sigma * sigma
+    mu = nu * T
+    var = sigma * sigma * T
+    sd = math.sqrt(var)
+
+    h = math.log(H / S)
+    xk = math.log(K / S)
+
+    log_a = 2.0 * nu * h / (sigma * sigma)
+    m_ref = 2.0 * h + mu
+    log_norm_const = -math.log(sd) - 0.5 * math.log(2.0 * math.pi)
+
+    def integrand(x):
+        if is_down:
+            if x < h:
+                return 0.0
+        else:
+            if x > h:
+                return 0.0
+
+        z = (x - mu) / sd
+        log_free = -0.5 * z * z + log_norm_const
+        free = math.exp(log_free) if log_free > -745.0 else 0.0
+
+        zr = (x - m_ref) / sd
+        log_ref = log_a - 0.5 * zr * zr + log_norm_const
+        ref = math.exp(log_ref) if log_ref > -745.0 else 0.0
+
+        density = free - ref
+        if density <= 0.0:
+            return 0.0
+
+        st = S * math.exp(x)
+
+        if is_call:
+            if st <= K:
+                return 0.0
+            payoff = st - K
+        else:
+            if st >= K:
+                return 0.0
+            payoff = K - st
+
+        return density * payoff
+
+    scale = max(1.0, abs(S), abs(K))
+    centers = [h, xk, mu, mu + var, m_ref]
+
+    if is_down:
+        if is_call:
+            a = max(h, xk)
+            b = max(a, mu, mu + var, m_ref) + 15.0 * sd
+            value = _integrate_segments(integrand, a, b, centers, sd, scale)
+        else:
+            a = h
+            b = xk
+            value = _integrate_segments(integrand, a, b, centers, sd, scale)
+    else:
+        if is_call:
+            a = xk
+            b = h
+            value = _integrate_segments(integrand, a, b, centers, sd, scale)
+        else:
+            b = min(h, xk)
+            a = min(mu, m_ref, b) - 15.0 * sd
+            value = _integrate_segments(integrand, a, b, centers, sd, scale)
+
+    return math.exp(-r * T) * value
+
+
+def barrier_price(S, K, H, T, r, q, sigma, is_call, barrier_type):
+    is_down = barrier_type.startswith("down")
+    is_out = barrier_type.endswith("out")
+
+    if is_down:
+        breached = S <= H
+    else:
+        breached = S >= H
+
+    vanilla = _bs_price(S, K, T, r, q, sigma, is_call)
+
+    if T <= 0.0:
+        intrinsic = max(S - K, 0.0) if is_call else max(K - S, 0.0)
+        if breached:
+            return 0.0 if is_out else intrinsic
+        else:
+            return intrinsic if is_out else 0.0
+
+    if breached:
+        return 0.0 if is_out else vanilla
+
+    knockout = _barrier_knockout_price(
+        S, K, H, T, r, q, sigma, is_call, is_down
+    )
+
+    if knockout < 0.0:
+        knockout = 0.0
+    if knockout > vanilla:
+        knockout = vanilla
+
+    if is_out:
+        return knockout
+    else:
+        return max(vanilla - knockout, 0.0)
+```

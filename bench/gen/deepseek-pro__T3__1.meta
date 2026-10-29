@@ -1,0 +1,1 @@
+{"attempt": 1, "seconds": 492, "meta": "{\"finish\": \"stop\", \"usage\": {\"prompt_tokens\": 335, \"completion_tokens\": 46773, \"total_tokens\": 47108, \"prompt_tokens_details\": {\"cached_tokens\": 0}, \"completion_tokens_details\": {\"reasoning_tokens\": 45322}, \"prompt_cache_hit_tokens\": 0, \"prompt_cache_miss_tokens\": 335}}"}

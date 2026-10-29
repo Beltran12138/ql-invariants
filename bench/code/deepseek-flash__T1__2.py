@@ -1,0 +1,131 @@
+import math
+
+def _norm_cdf(x):
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+
+def _bs_call(S, K, T, r, q, sigma):
+    if T <= 0.0:
+        return max(S - K, 0.0)
+    if sigma <= 0.0:
+        return max(S * math.exp(-q * T) - K * math.exp(-r * T), 0.0)
+    sqrtT = math.sqrt(T)
+    sigma_sqrtT = sigma * sqrtT
+    d1 = (math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / sigma_sqrtT
+    d2 = d1 - sigma_sqrtT
+    return S * math.exp(-q * T) * _norm_cdf(d1) - K * math.exp(-r * T) * _norm_cdf(d2)
+
+def _binomial_jr(S, K, T, r, q, sigma, is_call, n=128):
+    if T <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    dt = T / n
+    sqrt_dt = math.sqrt(dt)
+    nu = (r - q - 0.5 * sigma * sigma) * dt
+    dx = sigma * sqrt_dt
+    u = math.exp(nu + dx)
+    d = math.exp(nu - dx)
+    disc = math.exp(-r * dt)
+    disc_half = 0.5 * disc
+    ratio = u / d
+    ratio_pow = [1.0] * (n + 1)
+    for j in range(1, n + 1):
+        ratio_pow[j] = ratio_pow[j - 1] * ratio
+    d_n = d ** n
+    stock = [0.0] * (n + 1)
+    for j in range(n + 1):
+        stock[j] = S * d_n * ratio_pow[j]
+    if is_call:
+        values = [max(stock[j] - K, 0.0) for j in range(n + 1)]
+    else:
+        values = [max(K - stock[j], 0.0) for j in range(n + 1)]
+    di = d ** (n - 1)
+    for i in range(n - 1, -1, -1):
+        new_values = [0.0] * (i + 1)
+        S_di = S * di
+        vals = values
+        rp = ratio_pow
+        if is_call:
+            for j in range(i + 1):
+                cont = disc_half * (vals[j] + vals[j + 1])
+                s = S_di * rp[j]
+                ex = s - K
+                if ex < 0.0:
+                    ex = 0.0
+                if cont > ex:
+                    new_values[j] = cont
+                else:
+                    new_values[j] = ex
+        else:
+            for j in range(i + 1):
+                cont = disc_half * (vals[j] + vals[j + 1])
+                s = S_di * rp[j]
+                ex = K - s
+                if ex < 0.0:
+                    ex = 0.0
+                if cont > ex:
+                    new_values[j] = cont
+                else:
+                    new_values[j] = ex
+        values = new_values
+        if i > 0:
+            di /= d
+    return values[0]
+
+def _bs2002_call(S, K, T, r, q, sigma):
+    if T <= 0.0:
+        return max(S - K, 0.0)
+    if q <= 1e-8:
+        return _bs_call(S, K, T, r, q, sigma)
+    sigma2 = sigma * sigma
+    b = r - q
+    term = (b / sigma2 - 0.5) ** 2 + 2.0 * r / sigma2
+    if term < 0.0:
+        return _binomial_jr(S, K, T, r, q, sigma, True)
+    beta = (0.5 - b / sigma2) + math.sqrt(term)
+    if beta <= 1.0 + 1e-8:
+        return _binomial_jr(S, K, T, r, q, sigma, True)
+    B_inf = beta / (beta - 1.0) * K
+    if q > 1e-15:
+        B0 = max(K, r / q * K)
+    else:
+        B0 = K
+    sqrtT = math.sqrt(T)
+    h = -b * T - 2.0 * sigma * sqrtT * B_inf / (B_inf - K)
+    I = B0 + (B_inf - B0) * (1.0 - math.exp(h))
+    if S >= I:
+        return S - K
+    alpha = (I - K) * (I ** (-beta))
+
+    def phi(gamma, H):
+        lambda_ = (-r + gamma * b + 0.5 * gamma * (gamma - 1.0) * sigma2) * T
+        d = -(math.log(S / H) + (b + (gamma - 0.5) * sigma2) * T) / (sigma * sqrtT)
+        kappa = 2.0 * r / sigma2 + 2.0 * gamma - 1.0
+        I_over_S = I / S
+        d2 = d - 2.0 * math.log(I_over_S) / (sigma * sqrtT)
+        nd2 = _norm_cdf(d2)
+        if nd2 == 0.0:
+            term2 = 0.0
+        else:
+            term2 = (I_over_S ** kappa) * nd2
+        return math.exp(lambda_) * (S ** gamma) * (_norm_cdf(d) - term2)
+
+    price = (alpha * (S ** beta)
+             - alpha * phi(beta, I)
+             + phi(1.0, I)
+             - phi(1.0, K)
+             - K * phi(0.0, I)
+             + K * phi(0.0, K))
+    return price
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    if T <= 0.0:
+        return max(S - K, 0.0) if is_call else max(K - S, 0.0)
+    if is_call:
+        if r < 0.0 or q < 0.0:
+            return _binomial_jr(S, K, T, r, q, sigma, True)
+        else:
+            return _bs2002_call(S, K, T, r, q, sigma)
+    else:
+        if r < 0.0 or q < 0.0:
+            return _binomial_jr(S, K, T, r, q, sigma, False)
+        else:
+            return _bs2002_call(K, S, T, q, r, sigma)

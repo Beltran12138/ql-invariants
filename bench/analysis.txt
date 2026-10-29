@@ -1,0 +1,97 @@
+Primary metric: generations with >= 1 serious model-free failure (x / graded), plus no-code and ref-only rows
+
+model                                   T1                        T2                        T3
+opus                1/5 nc0 miss0 refonly0    1/5 nc0 miss0 refonly0    0/5 nc0 miss0 refonly0
+sonnet              1/5 nc0 miss0 refonly0    2/5 nc0 miss0 refonly0    1/5 nc0 miss0 refonly0
+deepseek-pro        5/5 nc0 miss0 refonly0    2/5 nc0 miss0 refonly1    0/5 nc0 miss0 refonly0
+deepseek-flash      3/5 nc0 miss0 refonly2    2/5 nc0 miss0 refonly0    1/5 nc0 miss0 refonly1
+gemini-pro          2/5 nc0 miss0 refonly3    5/5 nc0 miss0 refonly0    1/5 nc0 miss0 refonly0
+
+pooled T1: 12/25 = 48%
+pooled T2: 12/25 = 48%
+pooled T3: 3/25 = 12%
+
+H1 (T1 pooled >= 20%): MET (12/25)
+H2 (T3 pooled >= 20%): NOT MET (3/25)
+
+H3: inside region 112/600 points; serious inside 215/5600, outside 862/24400; odds ratio 1.09 -> NOT MET
+    95% CI (Woolf) 0.94 .. 1.27
+
+H4 (T2 vs T1, no direction): T1 12/25, T2 12/25
+
+Per generation (serious / model-free / ref, median ms):
+  deepseek-flash__T1__1       0    0   60     0.122
+  deepseek-flash__T1__2      43   61   36     0.016
+  deepseek-flash__T1__3       1    2   68     0.018
+  deepseek-flash__T1__4     110  123  153     0.021
+  deepseek-flash__T1__5       0    0   60     0.057
+  deepseek-flash__T2__1       9   64    0    79.703
+  deepseek-flash__T2__2       0    3    0    65.369
+  deepseek-flash__T2__3       0   28    0   279.026
+  deepseek-flash__T2__4       0    0    0    87.681
+  deepseek-flash__T2__5       2    2    0    88.370
+  deepseek-flash__T3__1       0    0    0     0.011
+  deepseek-flash__T3__2       0    0    1     0.381
+  deepseek-flash__T3__3       0    0    1     0.061
+  deepseek-flash__T3__4       1    1    1     0.018
+  deepseek-flash__T3__5       0    0   66     0.054
+  deepseek-pro__T1__1        92  123  127     0.048
+  deepseek-pro__T1__2       273  297  323     1.985
+  deepseek-pro__T1__3        41   44  138     0.031
+  deepseek-pro__T1__4       293  301  319     0.024
+  deepseek-pro__T1__5        67   77   88     0.031
+  deepseek-pro__T2__1         4   46    2    38.890
+  deepseek-pro__T2__2         0   35    0    56.556
+  deepseek-pro__T2__3         0    0   60     6.417
+  deepseek-pro__T2__4         3   37    1    55.481
+  deepseek-pro__T2__5         0   34    0    55.067
+  deepseek-pro__T3__1         0    0    1     0.837
+  deepseek-pro__T3__2         0    0    1     0.197
+  deepseek-pro__T3__3         0    0    1     0.010
+  deepseek-pro__T3__4         0    0    1     1.381
+  deepseek-pro__T3__5         0    0    1     0.597
+  gemini-pro__T1__1           0    2   65     0.182
+  gemini-pro__T1__2           0    0   65     0.025
+  gemini-pro__T1__3           1    1   75     0.076
+  gemini-pro__T1__4           0    0   59     0.041
+  gemini-pro__T1__5           7   53    6     4.930
+  gemini-pro__T2__1           3   37    1    28.362
+  gemini-pro__T2__2           5   47    2    12.762
+  gemini-pro__T2__3           5   47    2    12.688
+  gemini-pro__T2__4           5   47    2    36.150
+  gemini-pro__T2__5           5   47    2    54.302
+  gemini-pro__T3__1           0    0    1     0.805
+  gemini-pro__T3__2           0    0    1     0.626
+  gemini-pro__T3__3           0    0    1     0.793
+  gemini-pro__T3__4          10   15   86     0.796
+  gemini-pro__T3__5           0    0    1     0.872
+  opus__T1__1                 0    0   18     0.051
+  opus__T1__2                 0    0    0     0.663
+  opus__T1__3                 0    0    0     0.061
+  opus__T1__4                 1    1    1     0.578
+  opus__T1__5                 0    0    0     1.765
+  opus__T2__1                 0   11    1   118.868
+  opus__T2__2                 0    0    0    90.280
+  opus__T2__3                 0    1    0   139.346
+  opus__T2__4                 0    0    0    97.501
+  opus__T2__5                45   45    0    56.963
+  opus__T3__1                 0    0    1     0.010
+  opus__T3__2                 0    0    1     0.026
+  opus__T3__3                 0    0    1     0.012
+  opus__T3__4                 0    0    1     0.011
+  opus__T3__5                 0    0    1     0.010
+  sonnet__T1__1               0    0    0     0.430
+  sonnet__T1__2               1    2    1     0.005
+  sonnet__T1__3               0    2   17     0.212
+  sonnet__T1__4               0    1    0     0.500
+  sonnet__T1__5               0    1    1     0.383
+  sonnet__T2__1               0    0    0    45.483
+  sonnet__T2__2               0    0    0    51.861
+  sonnet__T2__3               0   34    0   123.218
+  sonnet__T2__4              59   59    0   135.596
+  sonnet__T2__5               2   34    0    69.547
+  sonnet__T3__1               0    0    1     0.012
+  sonnet__T3__2               5    6  100     0.014
+  sonnet__T3__3               0    0    1     0.015
+  sonnet__T3__4               0    0    1     0.015
+  sonnet__T3__5               0    0    1     0.015

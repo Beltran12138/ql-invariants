@@ -19,8 +19,13 @@ def post(url, body, headers, timeout=3600):
 
 def ask(model, prompt):
     if model in CLAUDE_MODELS:
-        p = subprocess.run([shutil.which("claude"), "-p", "--model", CLAUDE_MODELS[model], "--disallowedTools", *NO_TOOLS],
-                           input=prompt, capture_output=True, text=True, encoding="utf-8", cwd=EMPTY, timeout=3600, shell=False)
+        # Call claude.exe itself, not the npm .CMD wrapper: on timeout Python kills only the process it started,
+        # and a surviving claude.exe keeps the pipes open, so run() never returns (10-22: one call hung 6 hours).
+        # Opus T1 answers took 30-43 min; 90 min leaves room (infrastructure limit, not a generation setting).
+        exe = os.path.join(os.environ["APPDATA"], "npm", "node_modules", "@anthropic-ai", "claude-code", "bin", "claude.exe")
+        p = subprocess.run([exe if os.path.exists(exe) else shutil.which("claude"), "-p", "--model", CLAUDE_MODELS[model],
+                            "--disallowedTools", *NO_TOOLS],
+                           input=prompt, capture_output=True, text=True, encoding="utf-8", cwd=EMPTY, timeout=5400, shell=False)
         if p.returncode != 0 or not p.stdout.strip() or (
                 len(p.stdout) < 300 and re.search(r"hit your (session|usage|weekly) limit", p.stdout, re.I)):
             # CLI failure (process creation, quota, auth): not a model answer

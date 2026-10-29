@@ -1,0 +1,196 @@
+```python
+import math
+
+import numpy as np
+from scipy.special import gammaln, ndtr
+
+# Andersen-Lake-Offengelt (2016) 积分方程法的离散化参数
+_NC = 12      # 行权边界的 Chebyshev 区间数（在 sqrt(tau) 上）
+_NL = 24      # 不动点积分的 Gauss-Legendre 点数
+_NP = 48      # 定价积分的 Gauss-Legendre 点数
+_MAXIT = 5    # 不动点迭代次数（Anderson 加速）
+_SEEDIT = 2   # Barone-Adesi-Whaley 初值边界的 Newton 迭代次数
+_TOL = 1e-9
+_TREE_N = 64  # 双边界区间的格点步数
+_ISQ2PI = 1.0 / math.sqrt(2.0 * math.pi)
+
+
+def _cheb_matrix(zq, n):
+    # 把 n+1 个 Chebyshev 极值点上的值映射为 zq 处的插值
+    zq = np.clip(np.asarray(zq, float), -1.0, 1.0)
+    k = np.arange(n + 1)
+    ck = np.ones(n + 1)
+    ck[0] = ck[-1] = 0.5
+    C = np.cos(np.outer(k, k) * np.pi / n)
+    Tk = np.cos(np.outer(np.arccos(zq), k))
+    return (2.0 / n) * (Tk * ck) @ (C * ck[:, None]).T
+
+
+def _build(nc, nl, npr):
+    # 边界节点 tau_i = T*xi_i^2；[0, tau_i] 上的积分用 u = tau_i - s^2 换元
+    # (n, nl+1) 数组：第 0 列为 European 项，第 1.. 列为积分求积点
+    global _n, _XI2, _SQT, _UT, _WT, _M_FP, _VP, _VP2, _WP, _M_P
+    xi = 0.5 * (1.0 + np.cos(np.arange(nc + 1) * np.pi / nc))[:-1]   # 去掉 tau = 0 节点
+    _n = xi.shape[0]
+    y, w = np.polynomial.legendre.leggauss(nl)
+    v = 0.5 * (y + 1.0)
+    _XI2 = xi * xi
+    _SQT = np.empty((_n, nl + 1))                                    # sqrt(t / T), t = tau - u
+    _SQT[:, 0] = xi
+    _SQT[:, 1:] = xi[:, None] * v
+    _UT = np.zeros((_n, nl + 1))                                     # u / T
+    _UT[:, 1:] = _XI2[:, None] * (1.0 - v * v)
+    _WT = np.zeros((_n, nl + 1))                                     # du / T 的求积权重
+    _WT[:, 1:] = xi[:, None] * w * _SQT[:, 1:]
+    _M_FP = _cheb_matrix((2.0 * np.sqrt(_UT[:, 1:]) - 1.0).ravel(), nc)[:, :-1]
+    yp, wp = np.polynomial.legendre.leggauss(npr)
+    _VP = 0.5 * (yp + 1.0)                                           # s / sqrt(T)
+    _VP2 = _VP * _VP
+    _WP = wp * _VP                                                   # du / T 的权重
+    _M_P = _cheb_matrix(2.0 * np.sqrt(1.0 - _VP2) - 1.0, nc)[:, :-1]
+
+
+_build(_NC, _NL, _NP)
+
+
+def _ncdf(x):
+    return 0.5 * math.erfc(-x * 0.7071067811865476)
+
+
+def _euro_put(S, K, T, r, q, sigma):
+    st = sigma * math.sqrt(T)
+    d1 = (math.log(S / K) + (r - q) * T) / st + 0.5 * st
+    return K * math.exp(-r * T) * _ncdf(st - d1) - S * math.exp(-q * T) * _ncdf(-d1)
+
+
+def _seed(K, X, tau, r, q, sigma):
+    # 各节点的 Barone-Adesi-Whaley 临界价，返回 ln(B / X) <= 0
+    b = r - q
+    s2 = sigma * sigma
+    beta = 2.0 * b / s2 - 1.0
+    m = 2.0 * r / s2
+    lam_inf = 0.5 * (-beta - math.sqrt(beta * beta + 4.0 * m))
+    Binf = K * lam_inf / (lam_inf - 1.0)
+    st = sigma * np.sqrt(tau)
+    B = Binf + (K - Binf) * np.exp(np.minimum((b * tau - 2.0 * st) * (K / (K - Binf)), 0.0))
+    lam = 0.5 * (-beta - np.sqrt(beta * beta - 4.0 * m / np.expm1(-r * tau)))
+    eq = np.exp(-q * tau)
+    Ker = K * np.exp(-r * tau)
+    for _ in range(_SEEDIT):
+        d1 = (np.log(B / K) + b * tau) / st + 0.5 * st
+        a = eq * ndtr(-d1)
+        F = K - B - Ker * ndtr(st - d1) + B * a + (1.0 - a) * B / lam
+        dF = a - 1.0 + (1.0 - a + eq * _ISQ2PI * np.exp(-0.5 * d1 * d1) / st) / lam
+        B = np.clip(B - F / dF, 0.1 * B, 2.0 * B)
+    x = np.log(np.minimum(B, X) / X)
+    return np.where(np.isfinite(x), x, 0.0)
+
+
+def _put_alo(S, K, T, r, q, sigma):
+    # American put，r > 0（单一行权边界 B(tau)，B(0+) = X）
+    # 边界由 ALO 的 FP-B 不动点求解（FP-B 发散时改用 FP-A），
+    # 以 (ln(B/X))^2 在 sqrt(tau) 的 Chebyshev 网格上插值；价格 = European + 提前行权溢价积分
+    X = K * min(1.0, r / q) if q > 0.0 else K
+    b = r - q
+    sT = math.sqrt(T)
+    tau = T * _XI2
+    sst = (sigma * sT) * _SQT
+    isst = 1.0 / sst
+    bt = ((b / sigma + 0.5 * sigma) * sT) * _SQT
+    Ar = (r * T) * _WT * np.exp((r * T) * _UT)
+    Ar[:, 0] = 1.0
+    Aq = (q * T) * _WT * np.exp((q * T) * _UT)
+    Aq[:, 0] = 1.0
+    Arx = (_ISQ2PI * Ar) * isst
+    Aqx = (_ISQ2PI * Aq) * isst
+    lnKX = math.log(K / X)
+    lpref = lnKX - b * tau
+    Z = np.empty_like(sst)                     # ln(B(tau_i) / B(u)) = x_i + Z
+    Z[:, 0] = -lnKX
+    Zq = Z[:, 1:]
+    x = _seed(K, X, tau, r, q, sigma)
+    fpb = True
+    gprev = fprev = None
+    e1 = e2 = math.inf
+    for _ in range(_MAXIT):
+        Zq[...] = np.sqrt(np.maximum(_M_FP @ (x * x), 0.0)).reshape(_n, -1)
+        dp = (x[:, None] + Z) * isst + bt
+        if fpb:
+            dm = dp - sst
+            N = (Arx * np.exp(-0.5 * dm * dm)).sum(1)
+            D = (Aqx * np.exp(-0.5 * dp * dp) + Aq * ndtr(dp)).sum(1)
+        else:
+            N = (Ar * ndtr(dp - sst)).sum(1)
+            D = (Aq * ndtr(dp)).sum(1)
+        g = np.minimum(lpref + np.log(np.maximum(N, 1e-300) / np.maximum(D, 1e-300)), 0.0)
+        f = g - x
+        err = float(np.abs(f).max())
+        if err < _TOL:
+            x = g
+            break
+        if fpb and 1e-3 < err > e1 > e2:
+            fpb = False                        # FP-B 发散（低波动率）：改用 FP-A 重启
+            gprev = None
+            x = g
+            continue
+        if gprev is None:
+            x = g
+        else:                                  # Anderson 加速，深度 1
+            df = f - fprev
+            den = float(df @ df)
+            th = float(f @ df) / den if den > 0.0 else 0.0
+            x = np.minimum(g - th * (g - gprev), 0.0)
+        gprev, fprev = g, f
+        e2, e1 = e1, err
+    lnSX = math.log(S / X)
+    if lnSX <= x[0]:
+        return K - S
+    sp = (sigma * sT) * _VP
+    lnBu = -np.sqrt(np.maximum(_M_P @ (x * x), 0.0))
+    dp = (lnSX - lnBu) / sp + ((b / sigma + 0.5 * sigma) * sT) * _VP
+    tp = T * _VP2
+    f = (r * K) * np.exp(-r * tp) * ndtr(sp - dp) - (q * S) * np.exp(-q * tp) * ndtr(-dp)
+    return max(_euro_put(S, K, T, r, q, sigma) + T * float(_WP @ f), K - S)
+
+
+def _put_lattice(S, K, T, r, q, sigma):
+    # q < r < 0：行权区域可能夹在两条边界之间。用 Binomial Black-Scholes 格点
+    # （CRR，到期前一步代入 Black-Scholes 值），以 European 格点值作控制变量
+    b = r - q
+    n = max(_TREE_N, int(math.ceil(1.5 * T * (b / sigma) ** 2)))   # 保证 0 < p < 1
+    dt = T / n
+    sdt = sigma * math.sqrt(dt)
+    u = math.exp(sdt)
+    p = (math.exp(b * dt) - 1.0 / u) / (u - 1.0 / u)
+    disc = math.exp(-r * dt)
+    pu, pd = disc * p, disc * (1.0 - p)
+    j = np.arange(n)
+    ST = S * np.exp(sdt * (2.0 * j - (n - 1)))
+    d1 = (np.log(ST / K) + b * dt) / sdt + 0.5 * sdt
+    V = K * disc * ndtr(sdt - d1) - ST * math.exp(-q * dt) * ndtr(-d1)
+    lc = gammaln(n) - gammaln(j + 1.0) - gammaln(n - j)
+    euro = float(np.exp(lc + j * math.log(p) + (n - 1 - j) * math.log1p(-p)) @ V) * disc ** (n - 1)
+    jj = np.arange(n)
+    E = K - S * np.exp(sdt * (2.0 * jj[None, :] - jj[:, None]))   # 第 i 行：第 i 步的行权价值
+    V = np.maximum(V, E[n - 1])
+    for i in range(n - 2, -1, -1):
+        V = np.maximum(pd * V[:-1] + pu * V[1:], E[i, :i + 1])
+    e = _euro_put(S, K, T, r, q, sigma)
+    return max(e + max(float(V[0]) - euro, 0.0), K - S)
+
+
+def _put(S, K, T, r, q, sigma):
+    if r <= 0.0 and q >= r:
+        return _euro_put(S, K, T, r, q, sigma)   # 提前行权永不最优
+    if r >= 0.0:
+        return _put_alo(S, K, T, max(r, 1e-12), q, sigma)   # r = 0, q < 0：单边界，取 r -> 0+ 极限
+    return _put_lattice(S, K, T, r, q, sigma)
+
+
+def american_price(S, K, T, r, q, sigma, is_call):
+    S, K, T, r, q, sigma = float(S), float(K), float(T), float(r), float(q), float(sigma)
+    if is_call:
+        # McDonald-Schroder put-call 对称：C(S, K, T, r, q, sigma) = P(K, S, T, q, r, sigma)
+        return _put(K, S, T, q, r, sigma)
+    return _put(S, K, T, r, q, sigma)
+```
