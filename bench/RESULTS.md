@@ -113,7 +113,9 @@ because several independent implementations disagreed with the reference in the 
 rule of thumb as in the README, pointed the other way: when every pricer "fails" at one point, check
 the reference.
 
-This has not been reported to QuantLib yet.
+Reported as [QuantLib#2969](https://github.com/lballabio/QuantLib/issues/2969). Since then, computing the
+dropped `D()` term in high precision gives 0.0759866, the whole difference (1.5138544 − 0.0759866 =
+1.4378677).
 
 ## Limits
 

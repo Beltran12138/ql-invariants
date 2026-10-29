@@ -46,7 +46,8 @@ non-decreasing in maturity".
   serious model-free failure; the failures are not concentrated where carry is large relative to
   volatility (odds ratio 1.09). Along the way the pricers outvoted the reference: QuantLib's
   `AnalyticBarrierEngine` is about 5% high when volatility is very low and carry large, a case no
-  model-free check sees. [RESULTS.md](bench/RESULTS.md).
+  model-free check sees ([QuantLib#2969](https://github.com/lballabio/QuantLib/issues/2969)).
+  [RESULTS.md](bench/RESULTS.md).
 - **Hegic** ([`audit_hegic/`](audit_hegic/FINDINGS.md), on-chain options on Arbitrum): live quotes,
   ~36k historical pricer states and all 16,689 positions checked. No violation a buyer could hit; the
   "American ≥ intrinsic" check is vacuous there by design.
